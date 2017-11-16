@@ -23,7 +23,7 @@ to the require section of your `composer.json` file.
 
 Description
 -----
-To work with the extension, you can add the traits from [kr0lik/yii2-ltree](https://github.com/kr0lik/yii2-ltree) -> LtreeActiveRecordTrait or write your own with similar methods: getTree, after, before, append, prepend, delete, isRoot.
+To work with the extension, you can use traits from [kr0lik/yii2-ltree](https://github.com/kr0lik/yii2-ltree) or write your own with similar methods(Required methods: getTree, after, before, append, prepend, delete, isRoot, level).
 
 Usage
 -----
