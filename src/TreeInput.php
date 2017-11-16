@@ -7,9 +7,9 @@ use yii\helpers\{Html, Json};
 class TreeInput extends InputWidget
 {
     /**
-     * Url to Tree Manager Action
+     * Tree Input options
      *
-     * @var string
+     * @var array
      */
     public $treeOptions = [];
 
