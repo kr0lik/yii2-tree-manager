@@ -7,6 +7,11 @@ use yii\helpers\{Url, Json};
 
 class TreeManagerWidget extends Widget
 {
+    /**
+     * Tree Manager options
+     *
+     * @var array
+     */
     public $treeOptions = [];
 
     public function init()
