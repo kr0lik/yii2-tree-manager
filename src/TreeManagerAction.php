@@ -32,7 +32,7 @@ class TreeManagerAction extends Action
     /**
      * Scopes for tree query
      *
-     * @var
+     * @var array
      */
     public $treeQueryScopes = [];
 
