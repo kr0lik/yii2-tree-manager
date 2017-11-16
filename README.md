@@ -1,6 +1,8 @@
 # yii2-tree-manager
 Yii2 tree manager using fancytree library.
 
+This extension can add/delete/move branches of tree and quick edit branch firlds.
+
 
 Installation
 ------------
