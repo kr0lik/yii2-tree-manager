@@ -19,7 +19,7 @@
         	"yiisoft/yii2": "*",
 		"yiisoft/yii2-bootstrap": "*",
 		"yiisoft/yii2-jui": "~2.0.0",
-		"bower-asset/fancytree": ">=2.12"
+		"bower-asset/fancytree": ">=2.26"
 	},
 	"autoload": {
 		"psr-4": {
