@@ -19,7 +19,7 @@
         	"yiisoft/yii2": "*",
 		"yiisoft/yii2-bootstrap": "*",
 		"yiisoft/yii2-jui": "~2.0.0",
-		"bower-asset/fancytree": "@dev"
+		"bower-asset/fancytree": "dev-master"
 	},
 	"autoload": {
 		"psr-4": {
