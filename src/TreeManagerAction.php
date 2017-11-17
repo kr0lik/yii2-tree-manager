@@ -102,7 +102,7 @@ class TreeManagerAction extends Action
             'success' => $success,
             'id' => $targetCategory->id,
             'hitId' => $hitId,
-            'html' => $this->controller->renderPartial('/' . __DIR__ . '/views/edit', [
+            'html' => $this->controller->renderFile(__DIR__ . '/views/edit.php', [
                 'category' => $targetCategory,
                 'hitId' => $hitId,
                 'fields' => $this->quickFormFieldsView,
