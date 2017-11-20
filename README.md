@@ -158,7 +158,7 @@ use kr0lik\tree\TreeManagerWidget;
 
 <?= TreeManagerWidget::widget([
     'treeOptions' => [
-        'pathAction' => Url::to('/path/to/yoyr/controller/tree-manager')
+        'pathAction' => Url::to('/path/to/yoyr/controller/tree-manager/action')
     ]
 ]) ?>
 ```
@@ -219,7 +219,7 @@ use kr0lik\tree\TreeInput;
 
 <?= $form->field($product, 'category_id')->widget(TreeInput::class, [
     'treeOptions' => [
-        'pathAction' => Url::to('/path/to/yoyr/controller/tree-manager'),
+        'pathAction' => Url::to('/path/to/yoyr/controller/tree-manager/action'),
         'firstNodeDefault' => false
     ]
 ]) ?>
