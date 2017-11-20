@@ -111,8 +111,6 @@ Options:
     cantCreateRootCategory: 'Нельзя создать корневую категорию'
     
 ]
-
-FOR Drag and Drop
 - dnd: [
 
     preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
@@ -122,8 +120,6 @@ FOR Drag and Drop
     autoExpandMS: 1000, // Expand nodes after n milliseconds of hovering.
     
 ]
-
-For Search
 - filter: [
 
     autoApply: true, // Re-apply last filter if lazy data is loaded
@@ -187,8 +183,6 @@ Options:
     cantCreateRootCategory: 'Нельзя создать корневую категорию'
     
 ]
-
-For Search
 - filter: [
  
     autoApply: true, // Re-apply last filter if lazy data is loaded
