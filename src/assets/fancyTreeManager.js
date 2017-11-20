@@ -1,8 +1,8 @@
 $.widget("custom.fancyTreeManager", {
     options: {
-        pathAction: null,
-        inputId: null,
-        defaultActiveId: null,
+        pathAction: null, // Path to tree-action script. Required
+        inputId: null, // Only for tree input
+        defaultActiveId: null, // Select nodes on init by default
         messages: {
             newCategory: 'Новая категория',
             youNotChooseCategory: 'Вы не выбрали категорию из списка',
@@ -13,9 +13,9 @@ $.widget("custom.fancyTreeManager", {
             cantCreateRootCategory: 'Нельзя создать корневую категорию'
         },
         dnd: {
-            preventVoidMoves: true,
-            preventRecursiveMoves: true,
-            autoExpandMS: 1000,
+            preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
+            preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
+            autoExpandMS: 1000, // Expand nodes after n milliseconds of hovering.
             dragStart: function(node, data) {
                 return true;
             },
@@ -33,28 +33,28 @@ $.widget("custom.fancyTreeManager", {
                         alert(result.message);
                     }
                 }).fail(function() {
-                    alert("Fatal error");
+                    alert("Move action error");
                 });
             }
         },
         filter: {
-            autoApply: true,   // Re-apply last filter if lazy data is loaded
+            autoApply: true, // Re-apply last filter if lazy data is loaded
             autoExpand: true, // Expand all branches that contain matches while filtered
-            counter: true,     // Show a badge with number of matching child nodes near parent icons
-            fuzzy: true,      // Match single characters in order, e.g. 'fb' will match 'FooBar'
-            hideExpandedCounter: false,  // Hide counter badge if parent is expanded
-            hideExpanders: false,       // Hide expanders if all child nodes are hidden by filter
-            highlight: true,   // Highlight matches by wrapping inside <mark> tags
+            counter: true, // Show a badge with number of matching child nodes near parent icons
+            fuzzy: true, // Match single characters in order, e.g. 'fb' will match 'FooBar'
+            hideExpandedCounter: false, // Hide counter badge if parent is expanded
+            hideExpanders: false, // Hide expanders if all child nodes are hidden by filter
+            highlight: true, // Highlight matches by wrapping inside <mark> tags
             leavesOnly: false, // Match end nodes only
-            nodata: true,      // Display a 'no data' status node if result is empty
-            mode: "hide"       // Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
+            nodata: true, // Display a 'no data' status node if result is empty
+            mode: "hide" // Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
         },
-        firstNodeDefault: true,
-        canAddRoot: true,
-        canDragToRoot: false,
-        highlightQuantity: true,
-        useEditForm: true,
-        multiple: false,
+        firstNodeDefault: true, // Select first node on init, if has not active node
+        canAddRoot: true, // Allow add root node
+        canDragToRoot: false, // Make node is root, if dnd enabled
+        highlightQuantity: true, // Highlight quantity by wrapping inside <small> tags, if name of node like: "some name (quantity)", where quantity is numeric. See TreeManagerAction -> treeQueryScopes
+        useEditForm: true, // Add quick edit form
+        multiple: false, // Select multiple nodes
     },
     treeWidget: null,
 

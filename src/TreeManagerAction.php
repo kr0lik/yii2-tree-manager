@@ -31,11 +31,31 @@ class TreeManagerAction extends Action
 
     /**
      * Scopes for tree query
+     * You can add quantity to name of node, by making scope, what will adding to the end of name: "Some name (quantity)".
+     * Example:
+     * ActiveQuery.php
+     * public function yourQuantityScope() {
+     *      $this->joinWith('products')
+     *      // For Postgresql
+     *          ->select(new Expression("name||' ('||COALESCE(SUM(products.active::int),0)||'/'||COUNT(product.id)||')' AS name"));
+     *      // Or MySQL
+     *          ->select(new Expression("CONCAT(name, '(', SUM(products.active), '/', COUNT(product.id), ')') AS name"));
+     * }
+     *
+     * And when in your controller:
+     * public function actions() {
+     *      return [
+     *          'tree-manager' => [
+     *              'class' => TreeManagerAction::class,
+     *              'categoryClass' => YourActiveRecordWithQuantityScope::class
+     *              'treeQueryScopes' => ['yourQuantityScope']
+     *          ]
+     *      ];
+     * }
      *
      * @var array
      */
     public $treeQueryScopes = [];
-
 
     /**
      * Return array for json format
@@ -102,7 +122,7 @@ class TreeManagerAction extends Action
             'success' => $success,
             'id' => $targetCategory->id,
             'hitId' => $hitId,
-            'html' => $this->controller->renderPartial(__DIR__ . '/views/edit', [
+            'html' => $this->controller->renderFile(__DIR__ . '/views/edit.php', [
                 'category' => $targetCategory,
                 'hitId' => $hitId,
                 'fields' => $this->quickFormFieldsView,

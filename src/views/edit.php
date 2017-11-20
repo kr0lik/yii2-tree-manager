@@ -19,7 +19,7 @@ use yii\helpers\{Html, Url, ArrayHelper};
         <div class="panel-body">
             <?= $form->field($category, 'name') ?>
             <?php if ($fields): ?>
-                <?= $this->render($fields, ['form' => $form, 'category' => $category]); ?>
+                <?= $this->render($fields, ['form' => $form, 'model' => $category]); ?>
             <?php endif; ?>
         </div>
         <div class="panel-footer">
@@ -27,7 +27,7 @@ use yii\helpers\{Html, Url, ArrayHelper};
             <?= Html::button('Отмена', ['class'=>'btn btn-sm btn-danger tree-form-edit-cancel']) ?>
 
             <?php if ($buttons): ?>
-                <?= $this->render($buttons, ['form' => $form, 'category' => $category]); ?>
+                <?= $this->render($buttons, ['form' => $form, 'model' => $category]); ?>
             <?php endif; ?>
         </div>
     <?php ActiveForm::end(); ?>

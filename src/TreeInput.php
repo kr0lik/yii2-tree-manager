@@ -8,6 +8,34 @@ class TreeInput extends InputWidget
 {
     /**
      * Tree Input options
+     * [
+     *      pathAction => // Path to your action script. Required
+     *      messages => [
+     *          newCategory: 'Новая категория',
+     *          youNotChooseCategory: 'Вы не выбрали категорию из списка',
+     *          categoryNotChoose: 'Не выбрана категория.',
+     *          categoryHasChildren: 'У категории есть вложенные категории.',
+     *          deleteCategory: 'Удалить категорию "{categoryName}"?',
+     *          cantDeleteCategory: 'Не удалось удлаить категорию.',
+     *          cantCreateRootCategory: 'Нельзя создать корневую категорию'
+     *      ],
+     *      // Search
+     *      filter => [
+     *          autoApply: true, // Re-apply last filter if lazy data is loaded
+     *          autoExpand: true, // Expand all branches that contain matches while filtered
+     *          counter: true, // Show a badge with number of matching child nodes near parent icons
+     *          fuzzy: true, // Match single characters in order, e.g. 'fb' will match 'FooBar'
+     *          hideExpandedCounter: false, // Hide counter badge if parent is expanded
+     *          hideExpanders: false, // Hide expanders if all child nodes are hidden by filter
+     *          highlight: true, // Highlight matches by wrapping inside <mark> tags
+     *          leavesOnly: false, // Match end nodes only
+     *          nodata: true, // Display a 'no data' status node if result is empty
+     *          mode: "hide" // Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
+     *      ],
+     *      firstNodeDefault => true, // Select first node on init, if has not active node
+     *      highlightQuantity => true, // Highlight quantity by wrapping inside <small> tags, if name of node like: "some name (quantity)", where quantity is numeric. See TreeManagerAction -> treeQueryScopes
+     *      multiple => false // Select multiple nodes
+     * ]
      *
      * @var array
      */
