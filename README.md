@@ -31,7 +31,7 @@ To work with extension, you can use traits from [kr0lik/yii2-ltree](https://gith
 Required fileds in model: id, name.
 
 # Usage
-First add ManagerAction
+First add TreeManagerAction
 ---
 Options:
  - categoryClass - ActveRecord with nodes and Required methods in ActveRecord(see Description);
