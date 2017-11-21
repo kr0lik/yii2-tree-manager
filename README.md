@@ -1,7 +1,7 @@
 # yii2-tree-manager
 Yii2 tree manager using fancytree library.
 
-This extension can add/delete/move branches of tree and quick edit branch firlds(like name, description, body).
+This extension can add/delete/move branches of tree and quick edit branch fields(like name, description, body).
 
 
 # Installation
