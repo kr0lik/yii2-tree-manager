@@ -1,4 +1,4 @@
-$.widget("custom.fancyTreeManager", {
+$.widget("custom.treeManager", {
     options: {
         pathAction: null, // Path to tree-action script. Required
         inputId: null, // Only for tree input
@@ -15,27 +15,7 @@ $.widget("custom.fancyTreeManager", {
         dnd: {
             preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
             preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
-            autoExpandMS: 1000, // Expand nodes after n milliseconds of hovering.
-            dragStart: function(node, data) {
-                return true;
-            },
-            dragEnter: function(node, data) {
-                if (node.getLevel() <= 1 && ! this.options.canDragToRoot) return false;  // Do not drag to root
-                if (! data.otherNode.data.id) return false; // Do not drag new nodes
-                return true;
-            },
-            dragDrop: function(node, data) {
-                $.get(this.options.pathAction, {action: "move", mode: data.hitMode, targetId: data.otherNode.data.id, hitId: node.data.id}, function(result) {
-                    if (result.success) {
-                        data.otherNode.moveTo(node, data.hitMode);
-                        if (data.hitMode == "over") node.setExpanded(true);
-                    } else if (result.message) {
-                        alert(result.message);
-                    }
-                }).fail(function() {
-                    alert("Move action error");
-                });
-            }
+            autoExpandMS: 1000 // Expand nodes after n milliseconds of hovering.
         },
         filter: {
             autoApply: true, // Re-apply last filter if lazy data is loaded
@@ -122,6 +102,29 @@ $.widget("custom.fancyTreeManager", {
                 }
             }
         };
+
+        if (options.dnd) {
+            options.dnd.dragStart = function(node, data) {
+                return true;
+            };
+            options.dnd.dragEnter = function(node, data) {
+                if (node.getLevel() <= 1 && ! self.options.canDragToRoot) return false;  // Do not drag to root
+                if (! data.otherNode.data.id) return false; // Do not drag new nodes
+                return true;
+            };
+            options.dnd.dragDrop = function(node, data) {
+                $.get(self.options.pathAction, {action: "move", mode: data.hitMode, targetId: data.otherNode.data.id, hitId: node.data.id}, function(result) {
+                    if (result.success) {
+                        data.otherNode.moveTo(node, data.hitMode);
+                        if (data.hitMode == "over") node.setExpanded(true);
+                    } else if (result.message) {
+                        alert(result.message);
+                    }
+                }).fail(function() {
+                    alert("Move action error");
+                });
+            }
+        }
 
         if (self.options.multiple) {
             options.checkbox = true;
@@ -302,7 +305,7 @@ $.widget("custom.fancyTreeManager", {
     },
     _updateInput: function (id) {
         $("#" + this.options.inputId).val(id);
-        $( document ).trigger( "fancytreemanager:selected", [ id ] );
+        $( document ).trigger( "treemanager:selected", [ id ] );
     },
     _updateToggleButton: function (title, hide) {
         var button = this.element.closest('.tree-input-dropdown').find('.tree-input-dropdown-toggle');

@@ -70,6 +70,10 @@ class TreeManagerAction extends Action
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
+        if ($mode && ! in_array($mode, ['over', 'before', 'after'])) { // 'append', 'prepend',
+            return ['success' => false, 'message' => 'Wrong mode'];
+        }
+
         switch ($action) {
             case 'tree':
                 $data = $this->tree($targetId);
