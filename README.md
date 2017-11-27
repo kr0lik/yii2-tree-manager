@@ -76,7 +76,7 @@ public function yourQuantityScope() {
           ->select(new Expression("CONCAT(name, '(', SUM(products.active), '/', COUNT(product.id), ')') AS name"));
  }
 ```
- And when in your controller:
+ And then in your controller:
  ```php
  public function actions() {
       return [
