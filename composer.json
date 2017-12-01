@@ -13,7 +13,7 @@
 			"name": "krolik",
 			"email": "krolik@yandex.ru"
 		}
-		],
+	],
 	"require": {
 		"php": ">=7.0",
         	"yiisoft/yii2": "*",
