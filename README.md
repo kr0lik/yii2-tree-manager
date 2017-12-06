@@ -24,9 +24,9 @@ to the require section of your `composer.json` file.
 
 # Description
 
-Extension will install(if not installed) fancytree library, jquery, jqueryui and bootstrap.
+Extension will install fancytree library, yii2-jquery, yii2-jqueryui and yii2-bootstrap.
 
-To work with extension, you can use traits from [kr0lik/yii2-ltree](https://github.com/kr0lik/yii2-ltree) or write your own with similar methods(Required methods in ActveRecord: getTree, after, before, append, prepend, delete, isRoot, level).
+To work with extension, you can use traits from [kr0lik/yii2-ltree](https://github.com/kr0lik/yii2-ltree) in your model or write your own with similar methods(Required methods in ActveRecord: getTree, after, before, append, prepend, delete, isRoot, level).
 
 Required fileds in model: id, name.
 
