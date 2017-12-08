@@ -222,7 +222,7 @@ use yii\helpers\Url;
 use kr0lik\tree\TreeInput;
 ?>
 
-<?= $form->field($product, 'category_id')->widget(TreeInput::class, [
+<?= $form->field($model, 'field_name')->widget(TreeInput::class, [
     'treeOptions' => [
         'pathAction' => Url::to('/path/to/yoyr/controller/tree-manager/action'),
         'firstNodeDefault' => false
