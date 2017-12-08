@@ -68,6 +68,8 @@ You can add quantity to name of node, by making scope, what will adding to the e
 
 ActiveQuery.php
 ```php
+use yii\db\Expression;
+
 public function yourQuantityScope() {
       $this->joinWith('products')
       // For Postgresql
@@ -78,6 +80,9 @@ public function yourQuantityScope() {
 ```
  And then in your controller:
  ```php
+ use kr0lik\tree\TreeManagerAction;
+ use app\path\to\YourActiveRecordWithQuantityScope;
+ 
  public function actions() {
       return [
           'tree-manager' => [
