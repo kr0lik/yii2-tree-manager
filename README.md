@@ -40,11 +40,11 @@ Options:
  - treeQueryScopes - scopes getTree method
 
 
-Controller.php
+In your Controller:
 ```php
 use yii\web\Controller;
 use kr0lik\tree\TreeManagerAction;
-use your\Tree\Nodes\Model;
+use app\path\to\YourActiveRecord;
 
 class YourController extends Controller
 {
@@ -53,10 +53,9 @@ class YourController extends Controller
             return [
                 'tree-manager' => [
                     'class' => TreeManagerAction::class,
-                    'categoryClass' => Model::class,
+                    'categoryClass' => YourActiveRecord::class
                     'quickFormFieldsView' => 'path/to/quick/edit/fields/view.php',
-                    'quickFormButtonsView' => 'path/to/quick/edit/buttons/view.php',
-                    'treeQueryScopes' => ['yourQuantityScope']
+                    'quickFormButtonsView' => 'path/to/quick/edit/buttons/view.php'
                 ]
             ];
         }
