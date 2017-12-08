@@ -31,7 +31,7 @@ class TreeManagerAction extends Action
 
     /**
      * Scopes for tree query
-     * You can add quantity to name of node, by making scope, what will adding to the end of name: "Some name (quantity)".
+     * You can add quantity to name of node, by making scope, what will adding to the end of name: "Some name (quantity)" or "Some name (sum/total)".
      * Example:
      * ActiveQuery.php
      * public function yourQuantityScope() {
