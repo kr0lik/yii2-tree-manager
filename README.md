@@ -64,7 +64,7 @@ class YourController extends Controller
 }
 ```
 
-You can add quantity to name of node, by making scope, what will adding to the end of name: "Some name (quantity)". For example:
+You can add quantity to name of node, by making scope, what will adding to the end of name: "Some name (quantity)" or "Some name (sum/total)". For example:
 
 ActiveQuery.php
 ```php
