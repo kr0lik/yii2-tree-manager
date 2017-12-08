@@ -66,32 +66,53 @@ class YourController extends Controller
 
 You can add quantity to name of node, by making scope, what will adding to the end of name: "Some name (quantity)" or "Some name (sum/total)". For example:
 
-ActiveQuery.php
+In your ActiveRecord:
 ```php
-use yii\db\Expression;
+use yii\db\ActiveRecord;
 
-public function yourQuantityScope() {
-      $this->joinWith('products')
-      // For Postgresql
-          ->select(new Expression("name||' ('||COALESCE(SUM(products.active::int),0)||'/'||COUNT(product.id)||')' AS name"));
-      // Or MySQL
-          ->select(new Expression("CONCAT(name, '(', SUM(products.active), '/', COUNT(product.id), ')') AS name"));
- }
+class YourActiveRecord extends ActiveRecord
+{
+    public static function find()
+    {
+            return new YourActiveQuery(static::class);
+    }
+}
 ```
- And then in your controller:
- ```php
- use kr0lik\tree\TreeManagerAction;
- use app\path\to\YourActiveRecordWithQuantityScope;
- 
- public function actions() {
-      return [
-          'tree-manager' => [
-              'class' => TreeManagerAction::class,
-              'categoryClass' => YourActiveRecordWithQuantityScope::class
-              'treeQueryScopes' => ['yourQuantityScope']
-          ]
-      ];
- }
+
+In your ActiveQuery:
+```php
+use yii\db\{ActiveQuery, Expression};
+
+class YourActiveQuery extends ActiveQuery
+{
+    public function yourQuantityScope() {
+          $this->joinWith('products')
+          // For Postgresql
+              ->select(new Expression("name||' ('||COALESCE(SUM(products.active::int),0)||'/'||COUNT(product.id)||')' AS name"));
+          // Or MySQL
+              ->select(new Expression("CONCAT(name, '(', SUM(products.active), '/', COUNT(product.id), ')') AS name"));
+     }
+}
+```
+
+And then in your Controller:
+```php
+use yii\web\Controller;
+use kr0lik\tree\TreeManagerAction;
+use app\path\to\YourActiveRecord;
+
+class YourController extends Controller
+{
+    public function actions() {
+         return [
+             'tree-manager' => [
+                 'class' => TreeManagerAction::class,
+                 'categoryClass' => YourActiveRecord::class
+                 'treeQueryScopes' => ['yourQuantityScope']
+             ]
+         ];
+    }
+}
 ```
 
 Then add TreeManagerWidget
@@ -154,7 +175,7 @@ Options:
 - highlightQuantity: true - Highlight quantity by wrapping inside <small> tags, if name of node like: "some name (quantity)", where quantity is numeric. See TreeManagerAction -> treeQueryScopes
 - useEditForm: true - Add quick edit form
 
-View.php
+In your View:
 ```php
 <?php
 use yii\helpers\Url;
@@ -215,7 +236,7 @@ Options:
 - highlightQuantity: true - Highlight quantity by wrapping inside <small> tags, if name of node like: "some name (quantity)", where quantity is numeric. See TreeManagerAction -> treeQueryScopes
 - multiple: false - Select multiple nodes
 
-View.php
+In your View:
 ```php
 <?php
 use yii\helpers\Url;
