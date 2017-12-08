@@ -145,7 +145,7 @@ $.widget("custom.treeManager", {
             options.renderNode = function(event, data) {
                 var node = data.node;
                 var title = $(node.span).find("> span.fancytree-title").html();
-                var count = title.match(/(\(\d+\/\d+\))$/);
+                var count = title.match(/(\(\d+(\/\d+){0,1}\))$/);
 
                 if (count) {
                     title = title.replace(count[0], "<small>" + count[0] + "</small>");
