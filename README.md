@@ -87,9 +87,9 @@ class YourActiveQuery extends ActiveQuery
     public function yourQuantityScope() {
           $this->joinWith('products')
           // For Postgresql
-              ->select(new Expression("name||' ('||COALESCE(SUM(products.active::int),0)||'/'||COUNT(product.id)||')' AS name"));
+              ->select(new Expression("name||' ('||COALESCE(SUM(products.active::int),0)||'/'||COUNT(products.id)||')' AS name"));
           // Or MySQL
-              ->select(new Expression("CONCAT(name, '(', SUM(products.active), '/', COUNT(product.id), ')') AS name"));
+              ->select(new Expression("CONCAT(name, '(', SUM(products.active), '/', COUNT(products.id), ')') AS name"));
      }
 }
 ```
