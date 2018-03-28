@@ -85,6 +85,6 @@ class TreeInput extends InputWidget
     {
         TreeManagerAsset::register($this->getView());
 
-        $this->getView()->registerJs("$('#{$this->id}').fancyTreeManager(" . Json::encode($this->treeOptions) . ")");
+        $this->getView()->registerJs("$('#{$this->id}').treeManager(" . Json::encode($this->treeOptions) . ")");
     }
 }
