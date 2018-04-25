@@ -1,7 +1,7 @@
 <?php
 namespace kr0lik\tree;
 
-use yii\base\{Widget, ErrorException};
+use yii\base\{Widget, InvalidConfigException};
 use yii\web\JsExpression;
 use yii\helpers\{Url, Json};
 
@@ -54,7 +54,7 @@ class TreeManagerWidget extends Widget
     public function init()
     {
         if (! isset($this->treeOptions['pathAction']) || ! $this->treeOptions['pathAction']) {
-            throw new ErrorException('PathAction of tree options is required.');
+            throw new InvalidConfigException('PathAction of tree options is required.');
         }
 
         parent::init();
