@@ -11,13 +11,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-composer require --prefer-dist kr0lik/yii2-tree-manager "dev-master"
+composer require --prefer-dist kr0lik/yii2-tree-manager "*"
 ```
 
 or add
 
 ```
-"kr0lik/yii2-tree-manager": "dev-master"
+"kr0lik/yii2-tree-manager": "*"
 ```
 
 to the require section of your `composer.json` file.
