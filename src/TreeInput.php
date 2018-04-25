@@ -3,6 +3,7 @@ namespace kr0lik\tree;
 
 use yii\widgets\InputWidget;
 use yii\helpers\{Html, Json};
+use yii\base\InvalidConfigException;
 
 class TreeInput extends InputWidget
 {
@@ -51,7 +52,7 @@ class TreeInput extends InputWidget
     public function init()
     {
         if (! isset($this->treeOptions['pathAction']) || ! $this->treeOptions['pathAction']) {
-            throw new ErrorException('PathAction of tree options is required.');
+            throw new InvalidConfigException('PathAction of tree options is required.');
         }
 
         parent::init();
