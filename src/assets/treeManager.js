@@ -5,12 +5,12 @@ $.widget("custom.treeManager", {
         defaultActiveId: null, // Select nodes on init by default
         messages: {
             newCategory: 'Новая категория',
-            youNotChooseCategory: 'Вы не выбрали категорию из списка',
+            youNotChooseCategory: 'Вы не выбрали категорию из списка.',
             categoryNotChoose: 'Не выбрана категория.',
             categoryHasChildren: 'У категории есть вложенные категории.',
             deleteCategory: 'Удалить категорию "{categoryName}"?',
-            cantDeleteCategory: 'Не удалось удлаить категорию.',
-            cantCreateRootCategory: 'Нельзя создать корневую категорию'
+            cantDeleteCategory: 'Не удалось удaлить категорию.',
+            cantCreateRootCategory: 'Нельзя создать корневую категорию.'
         },
         dnd: {
             preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
