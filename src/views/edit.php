@@ -6,7 +6,7 @@ use yii\helpers\{Html, Url, ArrayHelper};
 <div class="panel panel-info">
     <div class="panel-heading">
         <?php if ($category->id): ?>
-            <?= implode(' >> ', ArrayHelper::map($category->getParents()->all(), 'id', 'name')) ?>
+            <?= implode(' >> ', ArrayHelper::map($category->getParents()->sorted()->all(), 'id', 'name')) ?>
             <?= $category->level() > 0 ? ' >> ' : '' ?>
             <strong><?= $category->name ?></strong>
         <?php else: ?>
