@@ -261,6 +261,8 @@ $.widget("custom.treeManager", {
                     self.treeWidget.reload({
                         url: self._makeActionUrl(self._makeActionUrl(self.options.pathAction, 'action', 'tree'), 'targetId', result.id)
                     });
+                } else {
+                    self._initFormActions();
                 }
             }, "json").fail(function() {
                 alert("Fatal error");
