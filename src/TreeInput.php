@@ -1,91 +1,89 @@
 <?php
 namespace kr0lik\tree;
 
-use yii\widgets\InputWidget;
-use yii\helpers\{Html, Json};
+use kr0lik\tree\assets\TreeInputAsset;
+use Yii;
 use yii\base\InvalidConfigException;
+use yii\helpers\{Html, Json};
+use yii\widgets\InputWidget;
 
 class TreeInput extends InputWidget
 {
     /**
-     * Tree Input options
-     * [
-     *      pathAction => // Path to your action script. Required
-     *      messages => [
-     *          newCategory: 'Новая категория',
-     *          youNotChooseCategory: 'Вы не выбрали категорию из списка',
-     *          categoryNotChoose: 'Не выбрана категория.',
-     *          categoryHasChildren: 'У категории есть вложенные категории.',
-     *          deleteCategory: 'Удалить категорию "{categoryName}"?',
-     *          cantDeleteCategory: 'Не удалось удлаить категорию.',
-     *          cantCreateRootCategory: 'Нельзя создать корневую категорию'
-     *      ],
-     *      // Search
-     *      filter => [
-     *          autoApply: true, // Re-apply last filter if lazy data is loaded
-     *          autoExpand: true, // Expand all branches that contain matches while filtered
-     *          counter: true, // Show a badge with number of matching child nodes near parent icons
-     *          fuzzy: true, // Match single characters in order, e.g. 'fb' will match 'FooBar'
-     *          hideExpandedCounter: false, // Hide counter badge if parent is expanded
-     *          hideExpanders: false, // Hide expanders if all child nodes are hidden by filter
-     *          highlight: true, // Highlight matches by wrapping inside <mark> tags
-     *          leavesOnly: false, // Match end nodes only
-     *          nodata: true, // Display a 'no data' status node if result is empty
-     *          mode: "hide" // Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
-     *      ],
-     *      firstNodeDefault => true, // Select first node on init, if has not active node
-     *      highlightQuantity => true, // Highlight quantity by wrapping inside <small> tags, if name of node like: "some name (quantity)", where quantity is numeric. See TreeManagerAction -> treeQueryScopes
-     *      multiple => false // Select multiple nodes
-     * ]
-     *
-     * @var array
+     * @var array<string, mixed>
      */
     public $treeOptions = [];
+    /**
+     * @var string
+     */
+    public $viewPath = 'input';
 
     /**
-     * Tree container slid down absolute position
-     *
-     * @var bool
+     * @throws InvalidConfigException
      */
-    public $absolute = true;
-
-    public function init()
+    public function init(): void
     {
-        if (! isset($this->treeOptions['pathAction']) || ! $this->treeOptions['pathAction']) {
-            throw new InvalidConfigException('PathAction of tree options is required.');
-        }
+        $this->validate();
+        $this->prepare();
 
         parent::init();
     }
 
-    public function run()
+    public function run(): string
     {
+        $this->registerAssets();
+
         if ($this->hasModel()) {
-            echo Html::activeHiddenInput($this->model, $this->attribute, $this->options);
-
-            $this->treeOptions['inputId'] = Html::getInputId($this->model, $this->attribute);
-            $this->treeOptions['defaultActiveId'] = Html::getAttributeValue($this->model, $this->attribute);
+            $inputField = Html::activeHiddenInput($this->model, $this->attribute, $this->options);
         } else {
-            $this->options['id'] = "tree-input-{$this->id}";
-            echo Html::hiddenInput($this->name, $this->value, $this->options);
-
-            $this->treeOptions['inputId'] = $this->options['id'];
-            $this->treeOptions['defaultActiveId'] =  $this->value;
+            $inputField = Html::hiddenInput($this->name, $this->value, $this->options);
         }
 
-        $this->treeOptions['useEditForm'] = false;
-        $this->treeOptions['dnd'] = false;
-        $this->treeOptions['canAddRoot'] = false;
-
-        echo $this->render('input', ['id' => $this->id, 'treeOptions' => $this->treeOptions, 'absolute' => $this->absolute]);
-
-        $this->registerAssets();
+        return $this->render($this->viewPath, [
+            'id' => $this->id,
+            'inputField' => $inputField,
+        ]);
     }
 
-    public function registerAssets()
+    /**
+     * @throws InvalidConfigException
+     */
+    private function validate(): void
     {
-        TreeManagerAsset::register($this->getView());
+        if (!array_key_exists('pathAction', $this->treeOptions) || !$this->treeOptions['pathAction']) {
+            throw new InvalidConfigException('PathAction of tree options is required.');
+        }
+    }
 
-        $this->getView()->registerJs("$('#{$this->id}').treeManager(" . Json::encode($this->treeOptions) . ")");
+    private function prepare(): void
+    {
+        $selectId = null;
+
+        if ($this->hasModel()) {
+            $selectId = Html::getAttributeValue($this->model, $this->attribute);
+        } else {
+            $selectId = $this->value;
+        }
+
+        if ($selectId && !is_array($selectId)) {
+            $selectId = explode(',', $selectId);
+        }
+
+        $this->treeOptions['selectId'] = array_map('trim', (array) $selectId);
+
+        if (!array_key_exists('messages', $this->treeOptions)) {
+            $this->treeOptions['messages'] = [
+                'select' => Yii::t('kr0lik.tree', 'Select...'),
+            ];
+        }
+
+        $this->options['class'] = 'tree-input-field'.(array_key_exists('class', $this->options) ? ' '.$this->options['class'] : '');
+    }
+
+    private function registerAssets(): void
+    {
+        TreeInputAsset::register($this->getView());
+
+        $this->getView()->registerJs("$.kr0lik.treeInput(" . Json::encode($this->treeOptions) . ", '#{$this->id}')");
     }
 }

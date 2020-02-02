@@ -1,8 +1,11 @@
 # yii2-tree-manager
 Yii2 tree manager using fancytree library.
 
-This extension can add/delete/move branches of tree and quick edit branch fields(like name, description, body).
+This extension can add/delete/move branches of tree and quick edit branch fields.
 
+![Tree manager example](https://github.com/kr0lik/yii2-ltree/img/manager.png)
+
+![Tree select example](https://github.com/kr0lik/yii2-ltree/img/select.png)
 
 # Installation
 
@@ -11,7 +14,7 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-composer require --prefer-dist kr0lik/yii2-tree-manager "*"
+composer require --prefer-dist kr0lik/yii2-tree-manager
 ```
 
 or add
@@ -26,226 +29,159 @@ to the require section of your `composer.json` file.
 
 Extension will install fancytree library, yii2-jquery, yii2-jqueryui and yii2-bootstrap.
 
-To work with extension, you can use traits from [kr0lik/yii2-ltree](https://github.com/kr0lik/yii2-ltree) in your model or write your own with similar methods(Required methods in ActveRecord: getTree, after, before, append, prepend, delete, isRoot, level).
+You can with any tree extensions, just implement kr0lik\tree\contracts\TreeModelInterface
 
-Required fileds in model: id, name.
+Required fileds in model: `id`.
 
 # Usage
-First add TreeManagerAction
----
-Options:
- - categoryClass - ActveRecord with nodes and Required methods in ActveRecord(see Description);
- - quickFormFieldsView - View with additional fields for quick edit form of your ActveRecord(variables available: $form and $model)
- - quickFormButtonsView - View with Buttons for quick edit form your ActveRecord(variables available: $form and $model)
- - treeQueryScopes - scopes getTree method
+
+First implement `kr0lik\tree\contracts\TreeModelInterface` in Model.
 
 
-In your Controller:
+Tree Manager
+-------------
+Add `kr0lik\tree\TreeManagerAction` into controller.
+
+Required options:
+* treeModelClass - tree model class.
+
+Optional:
+* formViewPath - Path to form view.
+* formTitleField - Name of title field. Default: `name`.
+* formFields - Array of additional edit fields (ex: body or description). It can be string or callable.
+* formLinks - Array of links (ex: link to view page or edit page). It can be string or callable.
+
+Example:
 ```php
-use yii\web\Controller;
-use kr0lik\tree\TreeManagerAction;
+<?php
 use app\path\to\YourActiveRecord;
+use kr0lik\tree\TreeManagerAction;
+use yii\web\Controller;
+use yii\widgets\ActiveForm;
 
 class YourController extends Controller
 {
     public function actions()
-        {
-            return [
-                'tree-manager' => [
-                    'class' => TreeManagerAction::class,
-                    'categoryClass' => YourActiveRecord::class
-                    'quickFormFieldsView' => 'path/to/quick/edit/fields/view.php',
-                    'quickFormButtonsView' => 'path/to/quick/edit/buttons/view.php'
-                ]
-            ];
-        }
-
-}
-```
-
-You can add quantity to name of node, by making scope, what will adding to the end of name: "Some name (quantity)" or "Some name (sum/total)". For example:
-
-In your ActiveRecord:
-```php
-use yii\db\ActiveRecord;
-
-class YourActiveRecord extends ActiveRecord
-{
-    public static function find()
     {
-            return new YourActiveQuery(static::class);
+        return [
+            'tree' => [
+                'class' => TreeManagerAction::class,
+                'treeModelClass' => YourActiveRecord::class,
+                'formTitleField' => 'title',
+                'formFields' => [
+                    'description',
+                    function (ActiveForm $form, YourActiveRecord $model) {
+                        return $form->field($model, 'body')->textarea();
+                    },
+                ],
+                'formLinks' => [
+                    function (YourActiveRecord $model) {
+                        return Html::a('View', '/url/to/view'.$model->id, ['class' => 'btn btn-sm btn-info']);
+                    },
+                ]
+            ]
+        ];
     }
 }
 ```
 
-In your ActiveQuery:
-```php
-use yii\db\{ActiveQuery, Expression};
+Add `kr0lik\tree\TreeManagerWidget` into view.
 
-class YourActiveQuery extends ActiveQuery
-{
-    public function yourQuantityScope() {
-          $this->joinWith('products')
-          // For Postgresql
-              ->select(new Expression("name||' ('||COALESCE(SUM(products.active::int),0)||'/'||COUNT(products.id)||')' AS name"));
-          // Or MySQL
-              ->select(new Expression("CONCAT(name, '(', SUM(products.active), '/', COUNT(products.id), ')') AS name"));
-     }
-}
-```
+Required options:
+* treeOptions['pathAction'] - Url to tree model backend action.
 
-And then in your Controller:
-```php
-use yii\web\Controller;
-use kr0lik\tree\TreeManagerAction;
-use app\path\to\YourActiveRecord;
+Optional:
+* treeOptions - Tree config:
+  - multipleRoots: bool - Allow multiple roots.
+  - activeId: int - ID active node by default.
+  - dnd5 - for dissable drag and drop set null or false.
+* viewPath - path to view of manager.
 
-class YourController extends Controller
-{
-    public function actions() {
-         return [
-             'tree-manager' => [
-                 'class' => TreeManagerAction::class,
-                 'categoryClass' => YourActiveRecord::class
-                 'treeQueryScopes' => ['yourQuantityScope']
-             ]
-         ];
-    }
-}
-```
-
-Then add TreeManagerWidget
----
-Options:
-- pathAction - Path to tree-action script. **Required**
-- defaultActiveId: null - Select node on init by default
-- messages: [
-
-    newCategory: 'Новая категория',
-    
-    youNotChooseCategory: 'Вы не выбрали категорию из списка',
-    
-    categoryNotChoose: 'Не выбрана категория.',
-    
-    categoryHasChildren: 'У категории есть вложенные категории.',
-    
-    deleteCategory: 'Удалить категорию "{categoryName}"?',
-    
-    cantDeleteCategory: 'Не удалось удлаить категорию.',
-    
-    cantCreateRootCategory: 'Нельзя создать корневую категорию'
-    
-]
-- dnd: [
-
-    preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
-    
-    preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
-    
-    autoExpandMS: 1000, // Expand nodes after n milliseconds of hovering.
-    
-]
-- filter: [
-
-    autoApply: true, // Re-apply last filter if lazy data is loaded
-    
-    autoExpand: true, // Expand all branches that contain matches while filtered
-    
-    counter: true, // Show a badge with number of matching child nodes near parent icons
-    
-    fuzzy: true, // Match single characters in order, e.g. 'fb' will match 'FooBar'
-    
-    hideExpandedCounter: false, // Hide counter badge if parent is expanded
-    
-    hideExpanders: false, // Hide expanders if all child nodes are hidden by filter
-    
-    highlight: true, // Highlight matches by wrapping inside <mark> tags
-    
-    leavesOnly: false, // Match end nodes only
-    
-    nodata: true, // Display a 'no data' status node if result is empty
-    
-    mode: "hide" // Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
-    
-],
-- firstNodeDefault: true - Select first node on init, if has not active node
-- canAddRoot: true - Allow add root node
-- canDragToRoot: false - Make node is root, if dnd enabled
-- highlightQuantity: true - Highlight quantity by wrapping inside <small> tags, if name of node like: "some name (quantity)", where quantity is numeric. See TreeManagerAction -> treeQueryScopes
-- useEditForm: true - Add quick edit form
-
-In your View:
 ```php
 <?php
-use yii\helpers\Url;
 use kr0lik\tree\TreeManagerWidget;
 ?>
 
 <?= TreeManagerWidget::widget([
     'treeOptions' => [
-        'pathAction' => Url::to('/path/to/yoyr/controller/tree-manager/action')
+        'pathAction' => 'url/to/YourController/tree/action'
     ]
 ]) ?>
 ```
-Or add TreeInput
----
-Options:
-- pathAction - Path to your action script. **Required**
-- messages: [
- 
-    newCategory: 'Новая категория',
-    
-    youNotChooseCategory: 'Вы не выбрали категорию из списка',
-    
-    categoryNotChoose: 'Не выбрана категория.',
-    
-    categoryHasChildren: 'У категории есть вложенные категории.',
-    
-    deleteCategory: 'Удалить категорию "{categoryName}"?',
-    
-    cantDeleteCategory: 'Не удалось удлаить категорию.',
-    
-    cantCreateRootCategory: 'Нельзя создать корневую категорию'
-    
-]
-- filter: [
- 
-    autoApply: true, // Re-apply last filter if lazy data is loaded
-    
-    autoExpand: true, // Expand all branches that contain matches while filtered
-    
-    counter: true, // Show a badge with number of matching child nodes near parent icons
-    
-    fuzzy: true, // Match single characters in order, e.g. 'fb' will match 'FooBar'
-    
-    hideExpandedCounter: false, // Hide counter badge if parent is expanded
-    
-    hideExpanders: false, // Hide expanders if all child nodes are hidden by filter
-    
-    highlight: true, // Highlight matches by wrapping inside <mark> tags
-    
-    leavesOnly: false, // Match end nodes only
-    
-    nodata: true, // Display a 'no data' status node if result is empty
-    
-    mode: "hide" // Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
-    
-]
-- firstNodeDefault: true - Select first node on init, if has not active node
-- highlightQuantity: true - Highlight quantity by wrapping inside <small> tags, if name of node like: "some name (quantity)", where quantity is numeric. See TreeManagerAction -> treeQueryScopes
-- multiple: false - Select multiple nodes
 
-In your View:
+Tree Input
+-----------
+Add `kr0lik\tree\TreeAction` into controller.
+
+Required options:
+* treeModelClass - tree model class.
+
+Example: 
 ```php
 <?php
-use yii\helpers\Url;
+use yii\web\Controller;
+use kr0lik\tree\TreeAction;
+use app\path\to\YourActiveRecord;
+
+class YourController extends Controller
+{
+    public function actions()
+    {
+        return [
+            'tree' => [
+                'class' => TreeAction::class,
+                'treeModelClass' => YourActiveRecord::class,
+            ]
+        ];
+    }
+}
+```
+
+Add `kr0lik\tree\TreeInput` into view.
+
+Required options:
+* treeOptions['pathAction'] - Url to tree model backend action.
+
+Optional:
+* treeOptions: array - Tree config:
+  - leavesOnly: bool - Select only endpoint nodes.
+  - multiple: bool - Select multiple nodes.
+* options: array - input options.
+* viewPath: string - path to view of input.
+
+Example:
+```php
+<?php
 use kr0lik\tree\TreeInput;
 ?>
 
-<?= $form->field($model, 'field_name')->widget(TreeInput::class, [
+<?= $form->field($model, 'field')->widget(TreeInput::class, [
     'treeOptions' => [
-        'pathAction' => Url::to('/path/to/yoyr/controller/tree-manager/action'),
-        'firstNodeDefault' => false
+        'pathAction' => 'url/to/YourController/tree/action'
     ]
 ]) ?>
+```
+
+
+Internationalization
+----------------------
+All text and messages introduced in this extension are translatable under category 'kr0lik.tree'.
+You may use translations provided within this extension, using following application configuration:
+
+```php
+return [
+    'components' => [
+        'i18n' => [
+            'translations' => [
+                'kr0lik.tree' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@kr0lik/tree/messages',
+                ],
+                // ...
+            ],
+        ],
+        // ...
+    ],
+    // ...
+];
 ```
