@@ -1,174 +1,108 @@
 <?php
 namespace kr0lik\tree;
 
-use Yii;
-use yii\base\Action;
-use yii\web\Response;
+use kr0lik\tree\controllers\TreeManagerController;
+use kr0lik\tree\enum\TreeActionEnum;
+use kr0lik\tree\exception\{TreeActionException, TreeModeException, TreeNotFoundException};
+use kr0lik\tree\response\TreeResponse;
+use yii\base\InvalidConfigException;
 
-class TreeManagerAction extends Action
+class TreeManagerAction extends TreeAction
 {
     /**
-     * Class of tree category model
-     *
      * @var string
      */
-    public $categoryClass;
-
+    public $formViewPath = '@kr0lik/tree/views/edit.php';
     /**
-     * Path to view of additional fields for quick form edit
-     *
      * @var string
      */
-    public $quickFormFieldsView;
+    private $formTitleField = 'name';
+    /**
+     * @var string[]|callable
+     */
+    public $formFields = [];
+    /**
+     * @var string[]|callable
+     */
+    public $formLinks = [];
 
     /**
-     * Path to view of additional buttons for quick form edit
-     *
-     * @var string
+     * @throws InvalidConfigException
      */
-    public $quickFormButtonsView;
-
-
-    /**
-     * Scopes for tree query
-     * You can add quantity to name of node, by making scope, what will adding to the end of name: "Some name (quantity)" or "Some name (sum/total)".
-     * Example:
-     * ActiveQuery.php
-     * public function yourQuantityScope() {
-     *      $this->joinWith('products')
-     *      // For Postgresql
-     *          ->select(new Expression("name||' ('||COALESCE(SUM(products.active::int),0)||'/'||COUNT(product.id)||')' AS name"));
-     *      // Or MySQL
-     *          ->select(new Expression("CONCAT(name, '(', SUM(products.active), '/', COUNT(product.id), ')') AS name"));
-     * }
-     *
-     * And when in your controller:
-     * public function actions() {
-     *      return [
-     *          'tree-manager' => [
-     *              'class' => TreeManagerAction::class,
-     *              'categoryClass' => YourActiveRecordWithQuantityScope::class
-     *              'treeQueryScopes' => ['yourQuantityScope']
-     *          ]
-     *      ];
-     * }
-     *
-     * @var array
-     */
-    public $treeQueryScopes = [];
-
-    /**
-     * Return array for json format
-     *
-     * @param string $action
-     * @param int/null $targetId
-     * @param int/null $hitId
-     * @param string/null $mode
-     * @return array
-     */
-    public function run(string $action, $targetId = null, $hitId = null, $mode = null): array
+    protected function validate(): void 
     {
-        Yii::$app->response->format = Response::FORMAT_JSON;
+        parent::validate();
 
-        if ($mode && ! in_array($mode, ['over', 'before', 'after'])) { // 'append', 'prepend',
-            return ['success' => false, 'message' => 'Wrong mode'];
+        if (!$this->formViewPath) {
+            throw new InvalidConfigException('FormViewPath is required.');
+        } elseif (!is_string($this->formViewPath)) {
+            throw new InvalidConfigException('FormViewPath must be string.');
         }
 
+        if (!$this->formTitleField) {
+            throw new InvalidConfigException('FormTitleField is required.');
+        } elseif (!is_string($this->formTitleField)) {
+            throw new InvalidConfigException('FormTitleField must be string.');
+        }
+
+        if (!is_array($this->formFields)) {
+            throw new InvalidConfigException('FormFields must be array.');
+        }
+        if ($this->formFields) {
+            foreach ($this->formFields as $field) {
+                if (!is_string($field) && !is_callable($field)) {
+                    throw new InvalidConfigException('FormFields must be array of string (field name) or callable (function (FormActive $form, Model $model): ActiveField { return $form->field(); }).');
+                }
+            }
+        }
+
+        if (!is_array($this->formLinks)) {
+            throw new InvalidConfigException('FormLinks must be array.');
+        }
+        if ($this->formLinks) {
+            foreach ($this->formLinks as $link) {
+                if (!is_string($link) && !is_callable($link)) {
+                    throw new InvalidConfigException('FormLinks must be array of links (ex: Html::a()) or callable (function (Model $model): string { return Html::a(); }).');
+                }
+            }
+        }
+    }
+
+    /**
+     * @throws TreeActionException
+     * @throws TreeModeException
+     * @throws TreeNotFoundException
+     */
+    protected function runAction(string $action): TreeResponse
+    {
         switch ($action) {
-            case 'tree':
-                $data = $this->tree($targetId);
-                break;
-            case 'move':
-                $data = $this->move($mode, $targetId, $hitId);
-                break;
-            case 'load':
-                $mode = $mode ?: 'after';
-                $data = $this->load($targetId, $hitId, $mode);
-                break;
-            case 'delete':
-                $data = $this->delete($targetId);
-                break;
+            case TreeActionEnum::GET_FORM:
+                return $this->getController()->getFormAction(
+                    $this->formViewPath,
+                    $this->formTitleField,
+                    $this->formFields,
+                    $this->formLinks
+                );
+            case TreeActionEnum::CREATE:
+                return $this->getController()->createAction();
+            case TreeActionEnum::UPDATE:
+                return $this->getController()->updateAction();
+            case TreeActionEnum::DELETE:
+                return $this->getController()->deleteAction();
+            case TreeActionEnum::MOVE:
+                return $this->getController()->moveAction();
             default:
-                $data['success'] = false;
-                $data['message'] = 'No action';
+                return parent::runAction($action);
         }
-
-        return $data;
     }
 
-    private function tree($activeId = null): array
+    /**
+     * @throws TreeModeException
+     */
+    private function getController(): TreeManagerController
     {
-        return ($this->categoryClass)::getTree([
-            'id',
-            'title' => 'name',
-            'folder' => function () { return false; },
-            'icon' => function ($category) { return $category->isRoot() ? 'fa fa-tree' : false; },
-            'active' => function ($category) use ($activeId) { return $activeId ? $activeId == $category->id : $category->isRoot(); },
-            'expanded' => function ($category) use ($activeId) { return $category->isRoot(); }
-        ], $this->treeQueryScopes);
-    }
-
-    private function load($targetId = null, $hitId = null, $mode = 'after'): array
-    {
-        $targetCategory = ($this->categoryClass)::findOne((int) $targetId) ?? new $this->categoryClass;
-
-        $success = true;
-        if ($targetCategory->load(Yii::$app->request->post())) {
-            if ($hitId) {
-                $hitCategory = ($this->categoryClass)::findOne($hitId);
-                $success = $hitCategory->$mode($targetCategory);
-            } else {
-                $success = $targetCategory->save();
-            }
-        }
-
-        return [
-            'success' => $success,
-            'id' => $targetCategory->id,
-            'hitId' => $hitId,
-            'html' => $this->controller->renderFile(__DIR__ . '/views/edit.php', [
-                'category' => $targetCategory,
-                'hitId' => $hitId,
-                'fields' => $this->quickFormFieldsView,
-                'buttons' => $this->quickFormButtonsView
-            ])
-        ];
-    }
-
-    private function move(string $mode, $targetId, $hitId): array
-    {
-        if ($targetId && $hitId) {
-            $targetCategory = ($this->categoryClass)::findOne($targetId);
-            $hitCategory = ($this->categoryClass)::findOne($hitId);
-
-            $mode = $mode == 'over' ? 'append' : $mode;
-            $success = $hitCategory->$mode($targetCategory);
-
-            if (! $success) {
-                $message = implode(' ', $hitCategory->getFirstErrors());
-            }
-
-            $message = '';
-        } else {
-            $success = false;
-            $message = 'No id specified.';
-        }
-
-        return ['success' => $success, 'id' => $targetId, 'message' => $message];
-    }
-
-    private function delete(int $id): array
-    {
-        $category = ($this->categoryClass)::findOne($id);
-
-        $success = false;
-        $message = '';
-        if ($category) {
-            if (! ($success = $category->delete())) {
-                $message = implode(' ', $category->getFirstErrors());
-            }
-        }
-
-        return ['success' => $success, 'message' => $message];
+        $repository = $this->getRepository();
+        
+        return new TreeManagerController($this->controller, $repository);
     }
 }

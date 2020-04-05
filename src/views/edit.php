@@ -1,34 +1,52 @@
 <?php
 use yii\widgets\ActiveForm;
-use yii\helpers\{Html, Url, ArrayHelper};
+use yii\helpers\Html;
+
+/**
+ * @var \yii\base\Model   $model
+ * @var string            $titleField
+ * @var string            $actionUrl
+ * @var string[]|callable $fields
+ * @var string[]|callable $links
+ */
 ?>
 
 <div class="panel panel-info">
     <div class="panel-heading">
-        <?php if ($category->id): ?>
-            <?= implode(' >> ', ArrayHelper::map($category->getParents()->sorted()->all(), 'id', 'name')) ?>
-            <?= $category->level() > 0 ? ' >> ' : '' ?>
-            <strong><?= $category->name ?></strong>
-        <?php else: ?>
-            ...
-        <?php endif; ?>
+        <span class="tree-breadcrumbs"></span>
+        <strong class="tree-update-name">...</strong>
     </div>
     <?php $form = ActiveForm::begin([
-        'action' => Url::to(['', 'action' => 'load', 'targetId' => $category->id, 'hitId' => $hitId])
+        'action' => $actionUrl
     ]); ?>
         <div class="panel-body">
-            <?= $form->field($category, 'name') ?>
+            <?= $form->field($model, $titleField)->textInput(['class' => 'tree-form-input-name form-control']) ?>
             <?php if ($fields): ?>
-                <?= $this->render($fields, ['form' => $form, 'model' => $category]); ?>
+                <?php foreach ($fields as $field): ?>
+                    <?php if (is_callable($field)): ?>
+                        <?= $field($form, $model); ?>
+                    <?php else: ?>
+                        <?= $form->field($model, $field)->textInput(); ?>
+                    <?php endif; ?>
+                <?php endforeach; ?>
             <?php endif; ?>
         </div>
         <div class="panel-footer">
-            <?= Html::submitButton('Сохранить', ['class' => 'btn btn-sm btn-warning tree-form-edit-save']) ?>
-            <?= Html::button('Отмена', ['class'=>'btn btn-sm btn-danger tree-form-edit-cancel']) ?>
+            <?= Html::submitButton(Yii::t('kr0lik.tree', 'Save'), ['class' => 'btn btn-sm btn-warning tree-form-save']) ?>
+            <?= Html::button(Yii::t('kr0lik.tree', 'Cancel'), ['class'=>'btn btn-sm btn-danger tree-form-cancel']) ?>
 
-            <?php if ($buttons): ?>
-                <?= $this->render($buttons, ['form' => $form, 'model' => $category]); ?>
+            <?php if ($links): ?>
+                <?php foreach ($links as $link): ?>
+                    <?php if (is_callable($link)): ?>
+                        <?= $link($model); ?>
+                    <?php else: ?>
+                        <?= $link; ?>
+                    <?php endif; ?>
+                <?php endforeach; ?>
             <?php endif; ?>
+
+            <i class="tree-form-success fa fa-check fa-2x text-success pull-right" style="display: none"></i>
+            <div class="tree-form-error text-danger"></div>
         </div>
     <?php ActiveForm::end(); ?>
 </div>

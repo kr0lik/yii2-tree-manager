@@ -1,10 +1,23 @@
 <?php
 use yii\helpers\Html;
+
+/**
+ * @var string $id
+ * @var string $inputField
+ */
 ?>
 
-<div class="tree-input-dropdown<?= $absolute ? ' tree-input-absolute' : '' ?>">
-    <?= Html::a('loading...', "#tree-input-dropdown-toggle-{$id}", ['class' => 'btn btn-info tree-input-dropdown-toggle', 'data-toggle' => 'collapse']) ?>
-    <div id="tree-input-dropdown-toggle-<?= $id ?>" class="collapse tree-input-collapse">
-        <?= $this->render('_tree', ['id' => $id, 'treeOptions' => $treeOptions]) ?>
+<div id="<?= $id ?>" class="tree-input-dropdown">
+    <?= Html::a(
+        '<div class="text-left tree-input-list">loading...</div>',
+        "#{$id}-dropdown-toggle",
+        [
+            'class' => 'btn btn-info btn-block tree-input-dropdown-toggle',
+            'data-toggle' => 'collapse'
+        ]
+    ) ?>
+    <div id="<?= $id ?>-dropdown-toggle" class="collapse tree-input-collapse panel panel-primary">
+        <?= $this->render('tree') ?>
     </div>
+    <?= $inputField ?>
 </div>

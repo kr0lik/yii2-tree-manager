@@ -1,9 +1,9 @@
 <?php
-namespace kr0lik\tree;
+namespace kr0lik\tree\assets;
 
-use yii\web\{AssetBundle, JqueryAsset};
-use yii\jui\JuiAsset;
 use yii\bootstrap\BootstrapAsset;
+use yii\jui\JuiAsset;
+use yii\web\{AssetBundle, JqueryAsset};
 
 class FancyTreeAsset extends AssetBundle
 {
@@ -13,11 +13,10 @@ class FancyTreeAsset extends AssetBundle
     ];
     public $css = [
         'skin-lion/ui.fancytree.min.css',
-        'skin-bootstrap/ui.fancytree.min.css',
     ];
     public $depends = [
         JqueryAsset::class,
         JuiAsset::class,
-        BootstrapAsset::class
+        BootstrapAsset::class,
     ];
 }
