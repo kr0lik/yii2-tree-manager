@@ -76,7 +76,7 @@ class YourController extends Controller
                 ],
                 'formLinks' => [
                     function (YourActiveRecord $model) {
-                        return Html::a('View', '/url/to/view'.$model->id, ['class' => 'btn btn-sm btn-info']);
+                        return Html::a('View', ['/url/to/view', 'id' => $model->id], ['class' => 'btn btn-sm btn-info']);
                     },
                 ]
             ]
@@ -88,13 +88,13 @@ class YourController extends Controller
 Add `kr0lik\tree\TreeManagerWidget` into view.
 
 Required options:
-* treeOptions['pathAction'] - Url to tree model backend action.
+* pathAction - Url to tree model backend action.
 
 Optional:
-* treeOptions - Tree config:
-  - multipleRoots: bool - Allow multiple roots.
-  - activeId: int - ID active node by default.
-  - dnd5 - for dissable drag and drop set null or false.
+* treeOptions: array - Container tag options.
+* multipleRoots: bool - Allow multiple roots. Default: false.
+* activeId: int - ID active node by default.
+* dndEnable: bool - for dissable drag and drop set null or false.  Default: true.
 * viewPath - path to view of manager.
 
 ```php
@@ -103,9 +103,7 @@ use kr0lik\tree\TreeManagerWidget;
 ?>
 
 <?= TreeManagerWidget::widget([
-    'treeOptions' => [
-        'pathAction' => 'url/to/YourController/tree/action'
-    ]
+    'pathAction' => 'url/to/YourController/tree/action',
 ]) ?>
 ```
 
@@ -140,12 +138,12 @@ class YourController extends Controller
 Add `kr0lik\tree\TreeInput` into view.
 
 Required options:
-* treeOptions['pathAction'] - Url to tree model backend action.
+* pathAction - Url to tree model backend action.
 
 Optional:
-* treeOptions: array - Tree config:
-  - leavesOnly: bool - Select only endpoint nodes.
-  - multiple: bool - Select multiple nodes.
+* treeOptions: array - Container tag options.
+* leavesOnly: bool - Select only endpoint nodes. Default: true.
+* multiple: bool - Select multiple nodes. Default: false.
 * options: array - input options.
 * viewPath: string - path to view of input.
 
@@ -156,9 +154,7 @@ use kr0lik\tree\TreeInput;
 ?>
 
 <?= $form->field($model, 'field')->widget(TreeInput::class, [
-    'treeOptions' => [
-        'pathAction' => 'url/to/YourController/tree/action'
-    ]
+    'pathAction' => 'url/to/YourController/tree/action',
 ]) ?>
 ```
 
