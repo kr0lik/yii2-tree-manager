@@ -47,7 +47,7 @@ Required options:
 
 Optional:
 * formViewPath - Path to form view.
-* formTitleField - Name of title field. Default: `name`.
+* formNameField - Field with name of node. Default: `name`.
 * formFields - Array of additional edit fields (ex: body or description). It can be string or callable.
 * formLinks - Array of links (ex: link to view page or edit page). It can be string or callable.
 
@@ -67,7 +67,7 @@ class YourController extends Controller
             'tree' => [
                 'class' => TreeManagerAction::class,
                 'treeModelClass' => YourActiveRecord::class,
-                'formTitleField' => 'title',
+                'formNameField' => 'title',
                 'formFields' => [
                     'description',
                     function (ActiveForm $form, YourActiveRecord $model) {

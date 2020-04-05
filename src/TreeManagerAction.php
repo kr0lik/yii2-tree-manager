@@ -16,7 +16,7 @@ class TreeManagerAction extends TreeAction
     /**
      * @var string
      */
-    private $formTitleField = 'name';
+    private $formNameField = 'name';
     /**
      * @var string[]|callable
      */
@@ -39,10 +39,10 @@ class TreeManagerAction extends TreeAction
             throw new InvalidConfigException('FormViewPath must be string.');
         }
 
-        if (!$this->formTitleField) {
-            throw new InvalidConfigException('FormTitleField is required.');
-        } elseif (!is_string($this->formTitleField)) {
-            throw new InvalidConfigException('FormTitleField must be string.');
+        if (!$this->formNameField) {
+            throw new InvalidConfigException('FormNameField is required.');
+        } elseif (!is_string($this->formNameField)) {
+            throw new InvalidConfigException('FormNameField must be string.');
         }
 
         if (!is_array($this->formFields)) {
@@ -79,7 +79,7 @@ class TreeManagerAction extends TreeAction
             case TreeActionEnum::GET_FORM:
                 return $this->getController()->getFormAction(
                     $this->formViewPath,
-                    $this->formTitleField,
+                    $this->formNameField,
                     $this->formFields,
                     $this->formLinks
                 );

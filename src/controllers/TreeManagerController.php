@@ -19,7 +19,7 @@ class TreeManagerController extends AbstractTreeController
      *
      * @throws TreeNotFoundException
      */
-    public function getFormAction(string $formViewPath, string $formTitleField, array $formFields, array $formLinks): TreeResponse
+    public function getFormAction(string $formViewPath, string $formNameField, array $formFields, array $formLinks): TreeResponse
     {
         $targetId = Yii::$app->request->get('targetId');
 
@@ -34,7 +34,7 @@ class TreeManagerController extends AbstractTreeController
         return TreeResponse::data([
             'html' => $this->controller->renderFile($formViewPath, [
                 'model' => $targetModel,
-                'titleField' => $formTitleField,
+                'nameField' => $formNameField,
                 'actionUrl' => $this->getFormActionUrl(),
                 'fields' => $formFields,
                 'links' => $formLinks,

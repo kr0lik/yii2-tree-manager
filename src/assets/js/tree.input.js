@@ -60,8 +60,6 @@ $.widget("kr0lik.treeInput", {
     activate: function ($node) {
         if (this._isSelectable($node)) {
             $node.setSelected(true);
-        } else if (!this.options.multiple) {
-            this.getTree().unSelectAll();
         }
     },
     select: function ($node) {

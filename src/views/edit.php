@@ -4,7 +4,7 @@ use yii\helpers\Html;
 
 /**
  * @var \yii\base\Model   $model
- * @var string            $titleField
+ * @var string            $nameField
  * @var string            $actionUrl
  * @var string[]|callable $fields
  * @var string[]|callable $links
@@ -20,7 +20,7 @@ use yii\helpers\Html;
         'action' => $actionUrl
     ]); ?>
         <div class="panel-body">
-            <?= $form->field($model, $titleField)->textInput(['class' => 'tree-form-input-name form-control']) ?>
+            <?= $form->field($model, $nameField)->textInput(['class' => 'tree-form-input-name form-control']) ?>
             <?php if ($fields): ?>
                 <?php foreach ($fields as $field): ?>
                     <?php if (is_callable($field)): ?>
