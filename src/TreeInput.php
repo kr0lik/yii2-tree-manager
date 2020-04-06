@@ -89,10 +89,12 @@ class TreeInput extends InputWidget
         $this->treeConfig['selectId'] = $this->getSelectId();
         $this->treeConfig['leavesOnly'] = $this->leavesOnly;
         $this->treeConfig['multiple'] = $this->multiple;
-        if (!array_key_exists('messages', $this->treeConfig)) {
+        if (!$this->messages) {
             $this->treeConfig['messages'] = [
                 'select' => Yii::t('kr0lik.tree', 'Select...'),
             ];
+        } else {
+            $this->treeConfig['messages'] = $this->messages;
         }
 
         $this->treeOptions['id'] = ArrayHelper::getValue($this->treeOptions, 'id', $this->id);
