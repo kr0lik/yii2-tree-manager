@@ -29,7 +29,7 @@ to the require section of your `composer.json` file.
 
 Extension will install fancytree library, yii2-jquery, yii2-jqueryui and yii2-bootstrap.
 
-You can with any tree extensions, just implement kr0lik\tree\contracts\TreeModelInterface
+It can work with any tree extensions, just implement kr0lik\tree\contracts\TreeModelInterface
 
 Required fileds in model: `id`.
 
