@@ -17,6 +17,7 @@ use yii\helpers\Html;
         <strong class="tree-update-name">...</strong>
     </div>
     <?php $form = ActiveForm::begin([
+        'id' => "tree-manager-edit-form",
         'action' => $actionUrl
     ]); ?>
         <div class="panel-body">

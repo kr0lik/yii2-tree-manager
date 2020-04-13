@@ -1,7 +1,7 @@
 <?php
 namespace kr0lik\tree\response;
 
-use kr0lik\tree\exception\{TreeException, TreeModeException};
+use kr0lik\tree\exception\{TreeException, TreeModeException, TreeValidateException};
 
 class TreeResponse implements \JsonSerializable
 {
@@ -25,6 +25,9 @@ class TreeResponse implements \JsonSerializable
         return $this;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function setData(array $data): self
     {
         $this->data = $data;
@@ -50,10 +53,19 @@ class TreeResponse implements \JsonSerializable
 
     public static function error(TreeException $exception): self
     {
-        return (new self())
+        $result = (new self())
             ->setFail()
             ->setMessage("{$exception->getName()} {$exception->getMessage()}")
         ;
+
+        if ($exception instanceof TreeValidateException) {
+            $result->setData([
+                'errors' => $exception->getErrors(),
+                'validations' => $exception->getValidations(),
+            ]);
+        }
+
+        return $result;
     }
 
     /**

@@ -1,7 +1,7 @@
 # yii2-tree-manager
 Yii2 tree manager using fancytree library.
 
-This extension can add/delete/move(drag and drop) branches of tree and quick edit branch fields.
+This extension can add/delete/move branches of tree and quick edit branch fields.
 
 ![Tree manager example](https://github.com/kr0lik/yii2-tree-manager/blob/master/img/manager.png)
 
@@ -29,7 +29,7 @@ to the require section of your `composer.json` file.
 
 Extension will install fancytree library, yii2-jquery, yii2-jqueryui and yii2-bootstrap.
 
-It can work with any tree extensions, just implement kr0lik\tree\contracts\TreeModelInterface
+You can with any tree extensions, just implement kr0lik\tree\contracts\TreeModelInterface
 
 Required fileds in model: `id`.
 

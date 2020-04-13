@@ -10,6 +10,7 @@ class TreeActionEnum
     public const GET_FORM = 'getForm';
     public const GET_DATA = 'getData';
 
+    public const VALIDATE = 'validate';
     public const CREATE = 'create';
     public const UPDATE = 'update';
 

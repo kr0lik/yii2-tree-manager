@@ -110,6 +110,9 @@ class TreeInput extends InputWidget
         $this->getView()->registerJs("$.kr0lik.treeInput(" . Json::encode($this->treeConfig) . ", '#{$this->treeOptions['id']}')");
     }
 
+    /**
+     * @return string[]
+     */
     private function getSelectId(): array
     {
         $selectId = null;

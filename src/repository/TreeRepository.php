@@ -2,6 +2,7 @@
 namespace kr0lik\tree\repository;
 
 use kr0lik\tree\contracts\TreeModelInterface;
+use kr0lik\tree\exception\TreeClassException;
 use kr0lik\tree\exception\TreeNotFoundException;
 
 /**
@@ -33,7 +34,7 @@ class TreeRepository
      */
     public function getById(int $id): TreeModelInterface
     {
-        /** @var TreeModelInterface $model */
+        /** @var TreeModelInterface|null$model */
         $model = ($this->treeModelClass)::findTreeModelById($id);
 
         if (!$model) {

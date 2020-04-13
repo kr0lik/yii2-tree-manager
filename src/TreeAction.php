@@ -37,6 +37,8 @@ class TreeAction extends Action
      * @throws TreeActionException
      * @throws TreeModeException
      * @throws TreeNotFoundException
+     *
+     * @return array<string, mixed>
      */
     public function run(string $action): array
     {

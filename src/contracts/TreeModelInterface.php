@@ -1,6 +1,8 @@
 <?php
 namespace kr0lik\tree\contracts;
 
+use kr0lik\tree\exception\TreeValidateException;
+
 interface TreeModelInterface
 {
     public function getTreeId(): int;
@@ -36,12 +38,24 @@ interface TreeModelInterface
      */
     public function getParentTreeModels(): array;
 
+    /**
+     * @throws TreeValidateException
+     */
     public function addTreeRoot(): void;
 
+    /**
+     * @throws TreeValidateException
+     */
     public function appendToTreeModel(TreeModelInterface $model): void;
 
+    /**
+     * @throws TreeValidateException
+     */
     public function moveAfterTreeModel(TreeModelInterface $model): void;
 
+    /**
+     * @throws TreeValidateException
+     */
     public function moveBeforeTreeModel(TreeModelInterface $model): void;
 
     public function deleteTreeModel(): void;

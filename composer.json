@@ -2,7 +2,7 @@
 	"name": "kr0lik/yii2-tree-manager",
 	"description": "Yii2 widget for manage tree using fancytree",
 	"type": "yii2-extension",
-	"keywords": ["yii2","tree","treemanager","bootstrap","fancytree","ajax","jquery","jqueryui","postgresql","postgres","ltree","nestedsets"],
+	"keywords": ["yii2","tree","treemanager","bootstrap","fancytree","ajax","jquery","jqueryui","postgresql","postgres","ltree","nestedsets",'lazy'],
 	"license": "MIT",
 	"support": {
 		"source": "https://github.com/kr0lik/yii2-tree-manager"
@@ -18,7 +18,7 @@
 		"yiisoft/yii2": "^2.0",
 		"yiisoft/yii2-bootstrap": "^2.0",
 		"yiisoft/yii2-jui": "~2.0.0",
-		"bower-asset/fancytree": "*"
+		"bower-asset/fancytree": "^2.35"
 	},
 	"autoload": {
 		"psr-4": {

@@ -262,14 +262,13 @@ $.widget("kr0lik.treeManager", {
         $node.remove();
     },
     _formPrepare: function ($editedNode) {
-        var $tree = this.getTree();
-            $formContainer = this.getFormContainer();
+        var $formContainer = this.getFormContainer();
 
         $formContainer.html('<div class="loader form-loader"><i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i></div>');
 
         $.get(this.options.pathAction, this._formGetQuery($editedNode), ($result) => {
             if ($result.success) {
-                $formContainer.html($result.data.html);
+                $formContainer.html($result.data.form);
 
                 let $form = $formContainer.find('form');
                 let $name = $form.find(this.formInputNameClass).val();
@@ -279,18 +278,24 @@ $.widget("kr0lik.treeManager", {
                 }
 
                 $editedNode.setTitle($name);
-                this.getUpdateNamePlaces().text($name);
-                this.getBreadCrumbsPlaces().text($tree.getBreadCrumbs($editedNode));
 
-                this._formBindInput($form, $editedNode);
-                this._formBindSubmit($form, $editedNode);
-                this._formBindReset($form, $editedNode);
+                this._formBindActions($form, $editedNode)
             } else {
                 this._formShowError($result.message);
             }
         }, "json").fail(($response) => {
             this._formShowError($response.responseJSON.message);
         });
+    },
+    _formBindActions: function ($form, $editedNode) {
+        let $tree = this.getTree();
+
+        this.getUpdateNamePlaces().text($editedNode.title);
+        this.getBreadCrumbsPlaces().text($tree.getBreadCrumbs($editedNode));
+
+        this._formBindInput($form, $editedNode);
+        this._formBindSubmit($form, $editedNode);
+        this._formBindReset($form, $editedNode);
     },
     _formGetQuery: function ($node) {
         var $query = {
@@ -338,28 +343,43 @@ $.widget("kr0lik.treeManager", {
     },
     _formBindSubmit: function ($form, $node) {
         var $self = this;
+        var $formContainer = this.getFormContainer();
 
-        $form.bind("submit", function () {
-            $.post($form.attr('action'), $form.serialize(), function($result) {
+        $form.on('beforeSubmit', function ($event, $jqXHR, $settings) {
+            $.post($self.options.pathAction + '?action=validate', $form.serialize(), function($result) {
                 if ($result.success) {
-                    $node.data.disabled = false;
-                    $node.data.id = $result.data.data.id;
+                    $.post($form.attr('action'), $form.serialize(), function($result) {
+                        if ($result.success) {
+                            $node.data.disabled = false;
+                            $node.data.id = $result.data.data.id;
 
-                    $form.find($self.formSuccessMessageClass).fadeIn();
-                    $form.find($self.formErrorMessageClass).hide();
+                            $form.find($self.formSuccessMessageClass).fadeIn();
+                            $form.find($self.formErrorMessageClass).hide();
 
-                    $self.getTree().updateNode($node.parent, false);
+                            $self.getTree().updateNode($node.parent, false);
 
-                    setTimeout(function () {
-                        $($self.formSuccessMessageClass).fadeOut();
-                    }, 9000);
+                            setTimeout(function () {
+                                $($self.formSuccessMessageClass).fadeOut();
+                            }, 9000);
+                        } else if ($result.data.validations) {
+                            $form.yiiActiveForm('updateMessages', $result.data.validations, true);
+                        } else {
+                            $form.find($self.formErrorMessageClass).text($result.message).show();
+                        }
+                    }, "json").fail(function($response) {
+                        $form.find($self.formErrorMessageClass).text($response.responseJSON.message).show();
+                    });
+                } else if ($result.data.validations) {
+                    $form.yiiActiveForm('updateMessages', $result.data.validations, true);
                 } else {
-                    $form.find($self.formErrorMessageClass).text($result.message).show();
+                    $form.find($self.formErrorMessageClass).text($response.responseJSON.message).show();
                 }
-            }, "json").fail(function($response) {
-                $form.find($self.formErrorMessageClass).text($response.responseJSON.message).show();
             });
 
+            return false;
+        });
+
+        $form.bind("submit", function () {
             return false;
         });
     },

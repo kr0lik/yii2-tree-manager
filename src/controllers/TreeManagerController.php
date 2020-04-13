@@ -4,11 +4,13 @@ namespace kr0lik\tree\controllers;
 use kr0lik\tree\contracts\TreeModelInterface;
 use kr0lik\tree\enum\TreeActionEnum;
 use kr0lik\tree\enum\TreeModeEnum;
-use kr0lik\tree\exception\{TreeModeException, TreeNotFoundException};
+use kr0lik\tree\exception\{TreeModeException, TreeNotFoundException, TreeValidateException};
 use kr0lik\tree\response\TreeResponse;
 use Yii;
 use yii\base\ErrorException;
+use yii\base\Widget;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 use yii\helpers\Url;
 
 class TreeManagerController extends AbstractTreeController
@@ -32,7 +34,7 @@ class TreeManagerController extends AbstractTreeController
         }
 
         return TreeResponse::data([
-            'html' => $this->controller->renderFile($formViewPath, [
+            'form' => $this->controller->renderAjax($formViewPath, [
                 'model' => $targetModel,
                 'nameField' => $formNameField,
                 'actionUrl' => $this->getFormActionUrl(),
@@ -62,6 +64,24 @@ class TreeManagerController extends AbstractTreeController
         }
 
         return Url::to($query);
+    }
+
+    public function validateAction(): TreeResponse
+    {
+        $postData = Yii::$app->request->post();
+
+        $class = $this->repository->getTreeModelClass();
+        /** @var ActiveRecord|TreeModelInterface $targetModel */
+        $targetModel = new $class;
+        $targetModel->load($postData);
+
+        $attributes = array_key_exists($targetModel->formName(), $postData) ? array_keys($postData[$targetModel->formName()]) : null;
+
+        if (!$targetModel->validate($attributes)) {
+            throw new TreeValidateException($targetModel);
+        }
+
+        return TreeResponse::data([]);
     }
 
     /**
@@ -107,7 +127,7 @@ class TreeManagerController extends AbstractTreeController
         $targetModel->load(Yii::$app->request->post());
 
         if (!$targetModel->save()) {
-            throw new ErrorException('Save error');
+            throw new TreeValidateException($targetModel);
         }
 
         return TreeResponse::data($this->prepareModelData($targetModel));

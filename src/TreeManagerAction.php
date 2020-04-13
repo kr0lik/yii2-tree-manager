@@ -83,6 +83,8 @@ class TreeManagerAction extends TreeAction
                     $this->formFields,
                     $this->formLinks
                 );
+            case TreeActionEnum::VALIDATE:
+                return $this->getController()->validateAction();
             case TreeActionEnum::CREATE:
                 return $this->getController()->createAction();
             case TreeActionEnum::UPDATE:
