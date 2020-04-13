@@ -1,9 +1,10 @@
 <?php
+use yii\base\Model;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 
 /**
- * @var \yii\base\Model   $model
+ * @var Model             $model
  * @var string            $nameField
  * @var string            $actionUrl
  * @var string[]|callable $fields
@@ -33,7 +34,7 @@ use yii\helpers\Html;
             <?php endif; ?>
         </div>
         <div class="panel-footer">
-            <?= Html::submitButton(Yii::t('kr0lik.tree', 'Save'), ['class' => 'btn btn-sm btn-warning tree-form-save']) ?>
+            <?= Html::submitButton(Yii::t('kr0lik.tree', 'Save'), ['class' => 'btn btn-sm btn-success tree-form-submit']) ?>
             <?= Html::button(Yii::t('kr0lik.tree', 'Cancel'), ['class'=>'btn btn-sm btn-danger tree-form-cancel']) ?>
 
             <?php if ($links): ?>

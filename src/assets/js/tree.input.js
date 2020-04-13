@@ -102,6 +102,8 @@ $.widget("kr0lik.treeInput", {
         } else {
             this._clearInput();
         }
+
+        $(document).trigger('treeInputChange', [$tree.getSelectedNodes()]);
     },
     _clearInput: function () {
         this.getInputList().text(this.options.messages.select);
