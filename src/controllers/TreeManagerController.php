@@ -8,6 +8,7 @@ use kr0lik\tree\exception\{TreeModeException, TreeNotFoundException, TreeValidat
 use kr0lik\tree\response\TreeResponse;
 use Yii;
 use yii\base\ErrorException;
+use yii\base\Model;
 use yii\base\Widget;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
@@ -26,7 +27,7 @@ class TreeManagerController extends AbstractTreeController
         $targetId = Yii::$app->request->get('targetId');
 
         if ($targetId) {
-            $targetModel = $this->repository->getById((int) $targetId);
+            $targetModel = $this->repository->getById($targetId);
         } else {
             $class = $this->repository->getTreeModelClass();
             /** @var TreeModelInterface $targetModel */
@@ -97,12 +98,12 @@ class TreeManagerController extends AbstractTreeController
         }
 
         $class = $this->repository->getTreeModelClass();
-        /** @var TreeModelInterface $targetModel */
+        /** @var TreeModelInterface|Model $targetModel */
         $targetModel = new $class;
         $targetModel->load(Yii::$app->request->post());
 
         if ($hitId) {
-            $hitModel = $this->repository->getById((int) $hitId);
+            $hitModel = $this->repository->getById($hitId);
             if ($mode === TreeModeEnum::CHILD) {
                 $targetModel->appendToTreeModel($hitModel);
             } else {
@@ -123,7 +124,7 @@ class TreeManagerController extends AbstractTreeController
         $targetId = Yii::$app->request->get('targetId');
 
         /** @var ActiveRecord|TreeModelInterface $targetModel */
-        $targetModel = $this->repository->getById((int) $targetId);
+        $targetModel = $this->repository->getById($targetId);
         $targetModel->load(Yii::$app->request->post());
 
         if (!$targetModel->save()) {
@@ -141,7 +142,7 @@ class TreeManagerController extends AbstractTreeController
         $targetId = Yii::$app->request->get('targetId');
 
         /** @var TreeModelInterface $targetModel */
-        $targetModel = $this->repository->getById((int) $targetId);
+        $targetModel = $this->repository->getById($targetId);
 
         $targetModel->deleteTreeModel();
 
@@ -157,8 +158,8 @@ class TreeManagerController extends AbstractTreeController
         $hitId = Yii::$app->request->get('hitId');
         $mode = Yii::$app->request->get('mode');
 
-        $targetModel = $this->repository->getById((int) $targetId);
-        $hitModel = $this->repository->getById((int) $hitId);
+        $targetModel = $this->repository->getById($targetId);
+        $hitModel = $this->repository->getById($hitId);
 
         switch ($mode) {
             case TreeModeEnum::OVER:

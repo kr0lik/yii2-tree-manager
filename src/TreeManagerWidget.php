@@ -29,7 +29,7 @@ class TreeManagerWidget extends Widget
      */
     public $multipleRoots = false;
     /**
-     * @var bool
+     * @var mixed
      */
     public $activeId;
     /**

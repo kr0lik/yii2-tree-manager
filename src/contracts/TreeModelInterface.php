@@ -5,7 +5,10 @@ use kr0lik\tree\exception\TreeValidateException;
 
 interface TreeModelInterface
 {
-    public function getTreeId(): int;
+    /**
+     * @return int|sttring
+     */
+    public function getTreeId();
 
     public function getTreeTitle(): string;
 
@@ -19,7 +22,10 @@ interface TreeModelInterface
 
     public function getTreeCountActive(): ?int;
 
-    public static function findTreeModelById(int $id): ?TreeModelInterface;
+    /**
+     * @param string|int $id
+     */
+    public static function findTreeModelById($id): ?TreeModelInterface;
 
     /**
      * @return TreeModelInterface[]

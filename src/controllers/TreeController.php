@@ -24,7 +24,7 @@ class TreeController extends AbstractTreeController
     {
         $targetId = Yii::$app->request->get('targetId');
 
-        $model = $this->repository->getById((int) $targetId);
+        $model = $this->repository->getById($targetId);
         $models = $model->getChildrenTreeModels();
 
         return TreeResponse::data(array_map(function (TreeModelInterface $model) {
@@ -39,7 +39,7 @@ class TreeController extends AbstractTreeController
     {
         $targetId = Yii::$app->request->get('targetId');
 
-        $model = $this->repository->getById((int) $targetId);
+        $model = $this->repository->getById($targetId);
         $models = $model->getParentTreeModels();
 
         return TreeResponse::data(array_map(function (TreeModelInterface $model) {
@@ -54,7 +54,7 @@ class TreeController extends AbstractTreeController
     {
         $targetId = Yii::$app->request->get('targetId');
 
-        $model = $this->repository->getById((int) $targetId);
+        $model = $this->repository->getById($targetId);
 
         return TreeResponse::data($this->prepareModelData($model));
     }

@@ -63,7 +63,7 @@ $.widget("kr0lik.treeInput", {
         }
     },
     select: function ($node) {
-        this._updateInput($node);
+        this._updateSelection($node);
     },
     showError: function ($message) {
         this.getTree().showError($message);
@@ -85,20 +85,30 @@ $.widget("kr0lik.treeInput", {
     _isSelectable: function ($node) {
         return !(this.options.leavesOnly && $node.isFolder());
     },
-    _updateInput: function ($node) {
-        var $tree = this.getTree(),
-            $titles = [],
-            $ids = [];
+    _updateSelection: function ($node) {
+        var $tree = this.getTree();
 
-        $.each($tree.getSelectedNodes(), ($index, $node) => {
-            let $title = this.getTree().getBreadCrumbs($node, '/') + $node.title;
-            $titles.push($title);
-            $ids.push($node.data.id);
-        });
+        if ($tree.getSelectedNodes().length > 0) {
+            let $titles = [],
+                $ids = [];
 
-        if ($titles.length) {
+            $.each($tree.getSelectedNodes(), ($index, $node) => {
+                let $title = this.getTree().getBreadCrumbs($node, '/') + $node.title;
+                $titles.push($title);
+                $ids.push($node.data.id);
+            });
+
+            if (this.options.multiple) {
+                this.getInputField().html('');
+                $.each($ids, ($index, $id) => {
+                    let $title = $titles[$index];
+                    this.getInputField().append('<option value="'+$id+'" selected="selected">'+$title+'</option>');
+                });
+            } else {
+                this.getInputField().val($ids.join(','));
+            }
+
             this.getInputList().html($titles.join('<br />'));
-            this.getInputField().val($ids.join(','));
         } else {
             this._clearInput();
         }
@@ -107,6 +117,11 @@ $.widget("kr0lik.treeInput", {
     },
     _clearInput: function () {
         this.getInputList().text(this.options.messages.select);
-        this.getInputField().val('');
+
+        if (this.options.multiple) {
+            this.getInputField().html('');
+        } else {
+            this.getInputField().val('');
+        }
     }
 });

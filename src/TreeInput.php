@@ -53,16 +53,38 @@ class TreeInput extends InputWidget
     {
         $this->registerAssets();
 
-        if ($this->hasModel()) {
-            $inputField = Html::activeHiddenInput($this->model, $this->attribute, $this->options);
+        if ($this->multiple) {
+            $inputField = $this->getSelectField();
         } else {
-            $inputField = Html::hiddenInput($this->name, $this->value, $this->options);
+            $inputField = $this->getInpurField();
         }
 
         return $this->render($this->viewPath, [
             'options' => $this->treeOptions,
             'inputField' => $inputField,
         ]);
+    }
+
+    private function getInpurField(): string
+    {
+        if ($this->hasModel()) {
+            return Html::activeHiddenInput($this->model, $this->attribute, $this->options);
+        }
+
+        return Html::hiddenInput($this->name, $this->value, $this->options);
+    }
+
+    private function getSelectField(): string
+    {
+        $style = ArrayHelper::getValue($this->options, 'style', '');
+        $this->options['style'] = 'display: none;'.($style ? " $style" : '');
+        $this->options['multiple'] = 'multiple';
+
+        if ($this->hasModel()) {
+            return Html::activeListBox($this->model, $this->attribute, $this->getSelectId(), $this->options);
+        }
+
+        return Html::listBox($this->name, $this->getSelectId(), $this->value, $this->options);
     }
 
     /**
@@ -117,7 +139,7 @@ class TreeInput extends InputWidget
     {
         $selectId = null;
 
-        if ($this->hasModel()) {
+        if ($this->hasModel() && !$this->value) {
             $selectId = Html::getAttributeValue($this->model, $this->attribute);
         } else {
             $selectId = $this->value;

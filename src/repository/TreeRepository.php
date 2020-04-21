@@ -11,7 +11,7 @@ use kr0lik\tree\exception\TreeNotFoundException;
 class TreeRepository
 {
     /**
-     * @var string
+     * @var string|TreeModelInterface
      */
     private $treeModelClass;
 
@@ -30,11 +30,12 @@ class TreeRepository
     }
 
     /**
+     * @param string|int $id
      * @throws TreeNotFoundException
      */
-    public function getById(int $id): TreeModelInterface
+    public function getById($id): TreeModelInterface
     {
-        /** @var TreeModelInterface|null$model */
+        /** @var TreeModelInterface|null $model */
         $model = ($this->treeModelClass)::findTreeModelById($id);
 
         if (!$model) {
