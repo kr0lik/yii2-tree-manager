@@ -113,7 +113,7 @@ class TreeInput extends InputWidget
         $this->treeConfig['multiple'] = $this->multiple;
         if (!$this->messages) {
             $this->treeConfig['messages'] = [
-                'select' => Yii::t('kr0lik.tree', 'Select...'),
+                'select' => Yii::t('kr0lik.tree', 'Select'),
             ];
         } else {
             $this->treeConfig['messages'] = $this->messages;

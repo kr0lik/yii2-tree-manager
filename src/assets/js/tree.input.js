@@ -5,6 +5,8 @@ $.widget("kr0lik.treeInput", {
     inpitFieldClass: '.tree-input-field',
     inputListClass: '.tree-input-list',
 
+    loader: '<div class="loader text-left"><i class="fa fa-spinner fa-pulse fa-xs fa-fw"></i></div>',
+
     options: {
         pathAction: null,
         leavesOnly: true,
@@ -18,7 +20,11 @@ $.widget("kr0lik.treeInput", {
     _create: function() {
         this._validate();
         this._initTree();
-        this._clearInput();
+        if (!this.options.selectId.length) {
+            this._clearInput();
+        } else {
+            this.getInputList().append(this.loader);
+        }
     },
     _refresh: function() {
         this._trigger( "change" );
@@ -109,6 +115,10 @@ $.widget("kr0lik.treeInput", {
             }
 
             this.getInputList().html($titles.join('<br />'));
+
+            if (this.getTree().nodeToSelectId.length > 0) {
+                this.getInputList().append(this.loader);
+            }
         } else {
             this._clearInput();
         }

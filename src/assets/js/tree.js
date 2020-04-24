@@ -1,5 +1,6 @@
 $.widget("kr0lik.tree", {
-    nodeIdToLoad: [],
+    nodeToLoadId: [],
+    nodeToSelectId: [],
 
     treeContainerClass: '.tree-container',
     treeSearchInputClass: '.tree-search-input',
@@ -202,7 +203,11 @@ $.widget("kr0lik.tree", {
     _initSelections: function () {
         var $self = this;
 
-        let $ids = [...this.options.selectId];
+        this.nodeToSelectId = $.map(this.options.selectId, function($id){
+            return String($id);
+        });
+
+        let $ids = [...this.nodeToSelectId];
         $ids.push(this.options.activeId);
         $ids = [...new Set($ids)];
         $ids = $ids.filter(Boolean);
@@ -214,9 +219,9 @@ $.widget("kr0lik.tree", {
                         return $parentNode.data.id;
                     });
 
-                    $self.nodeIdToLoad = $self.nodeIdToLoad.concat($needIds);
-                    $self.nodeIdToLoad = [...new Set($self.nodeIdToLoad)];
-                    $self.nodeIdToLoad = $self.nodeIdToLoad.filter(Boolean);
+                    $self.nodeToLoadId = $self.nodeToLoadId.concat($needIds);
+                    $self.nodeToLoadId = [...new Set($self.nodeToLoadId)];
+                    $self.nodeToLoadId = $self.nodeToLoadId.filter(Boolean);
 
                     let $root = $self.getRootNode();
                     let $nodes = $root.children;
@@ -312,14 +317,17 @@ $.widget("kr0lik.tree", {
         }
 
         let $checkId = String($node.data.id);
-        if (this.options.selectId.indexOf($checkId) > -1 || this.options.selectId.indexOf(String($checkId)) > -1) {
+
+        let $searchSelection = this.nodeToSelectId.indexOf(String($checkId));
+        if ($searchSelection > -1) {
+            this.nodeToSelectId.splice($searchSelection, 1); // First remove from nodeToSelectId
             $node.setSelected(true);
         }
 
         if (!$node.isLoaded() && !$node.isLoading()) {
             $node.load(true);
         } else {
-            let $findIndex = this.nodeIdToLoad.indexOf($node.data.id);
+            let $findIndex = this.nodeToLoadId.indexOf($node.data.id);
             if (
                 $findIndex > -1
                 && $node.isLoaded()
