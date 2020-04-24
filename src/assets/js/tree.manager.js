@@ -28,6 +28,9 @@ $.widget("kr0lik.treeManager", {
             cantDelete: 'Cant delete',
             unsupportedMode: 'Mode not supported',
             hitNodeNotSaved: 'Hit section not saved',
+            loading: "Loading&#8230;",
+            loadError: "Load error!",
+            noData: "No data.",
         },
         dnd5: {
             autoExpandMS: 1500,
@@ -69,6 +72,7 @@ $.widget("kr0lik.treeManager", {
             dnd5: this.options.dnd5,
             extensions: this.options.extensions,
             plugins: [this],
+            messages: this.options.messages,
         };
 
         if ($options.dnd5) {

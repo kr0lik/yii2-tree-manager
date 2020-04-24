@@ -15,6 +15,9 @@ $.widget("kr0lik.treeInput", {
 
         messages: {
             select: 'Select...',
+            loading: "Loading&#8230;",
+            loadError: "Load error!",
+            noData: "No data."
         },
     },
     _create: function() {
@@ -55,6 +58,7 @@ $.widget("kr0lik.treeInput", {
                 return $type;
             },
             plugins: [this],
+            messages: this.options.messages,
         };
     },
     _initTree: function () {

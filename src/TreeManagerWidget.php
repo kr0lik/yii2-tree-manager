@@ -99,6 +99,9 @@ class TreeManagerWidget extends Widget
                 'cantDelete' => Yii::t('kr0lik.tree', 'Cant delete'),
                 'unsupportedMode' => Yii::t('kr0lik.tree', 'Mode not supported'),
                 'hitNodeNotSaved' => Yii::t('kr0lik.tree', 'Hit section not saved'),
+                'loading' => Yii::t('kr0lik.tree', 'Loading'),
+                'loadError' => Yii::t('kr0lik.tree', 'Load error'),
+                'noData' => Yii::t('kr0lik.tree', 'No data'),
             ];
         } else {
             $this->treeConfig['messages'] = $this->messages;

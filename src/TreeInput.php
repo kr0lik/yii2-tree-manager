@@ -114,6 +114,9 @@ class TreeInput extends InputWidget
         if (!$this->messages) {
             $this->treeConfig['messages'] = [
                 'select' => Yii::t('kr0lik.tree', 'Select'),
+                'loading' => Yii::t('kr0lik.tree', 'Loading'),
+                'loadError' => Yii::t('kr0lik.tree', 'Load error'),
+                'noData' => Yii::t('kr0lik.tree', 'No data'),
             ];
         } else {
             $this->treeConfig['messages'] = $this->messages;

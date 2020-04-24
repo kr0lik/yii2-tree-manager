@@ -30,6 +30,11 @@ $.widget("kr0lik.tree", {
         extensions: ['filter'],
         checkbox: false,
         selectMode: 0,
+        messages: {
+            loading: "Loading&#8230;",
+            loadError: "Load error!",
+            noData: "No data."
+        }
     },
     _create: function() {
         this._validate();
@@ -60,6 +65,7 @@ $.widget("kr0lik.tree", {
     },
     _getOptions: function() {
         return {
+            strings: this.options.messages,
             source: {
                 url: this.options.pathAction,
                 data: {action: "getRoots"},
