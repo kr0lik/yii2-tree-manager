@@ -1,5 +1,5 @@
 $.widget("kr0lik.treeManager", {
-    tree: null,
+    _tree: null,
 
     treeContainerClass: '.fancytree-connectors',
     formContainerClass: '.tree-manager-form-container',
@@ -137,10 +137,10 @@ $.widget("kr0lik.treeManager", {
         return $options;
     },
     _initTree: function () {
-        this.tree = $.kr0lik.tree(this._getOptions(), this.getTreeContainer());
+        this._tree = $.kr0lik.tree(this._getOptions(), this.getTreeContainer());
     },
     getTree: function () {
-        return this.tree;
+        return this._tree;
     },
     activate: function ($node) {
         this._formPrepare($node)

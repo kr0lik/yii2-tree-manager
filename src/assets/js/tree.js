@@ -1,6 +1,6 @@
 $.widget("kr0lik.tree", {
-    nodeToLoadId: [],
-    nodeToSelectId: [],
+    _nodeToLoadId: [],
+    _nodeToSelectId: [],
 
     treeContainerClass: '.tree-container',
     treeSearchInputClass: '.tree-search-input',
@@ -206,14 +206,17 @@ $.widget("kr0lik.tree", {
     getTreeContainer: function () {
         return this.getMainContainer().find(this.treeContainerClass);
     },
+    getNeedToSelectId: function () {
+        return this._nodeToSelectId;
+    },
     _initSelections: function () {
         var $self = this;
 
-        this.nodeToSelectId = $.map(this.options.selectId, function($id){
+        this._nodeToSelectId = $.map(this.options.selectId, function($id){
             return String($id);
         });
 
-        let $ids = [...this.nodeToSelectId];
+        let $ids = [...this._nodeToSelectId];
         $ids.push(this.options.activeId);
         $ids = [...new Set($ids)];
         $ids = $ids.filter(Boolean);
@@ -225,9 +228,9 @@ $.widget("kr0lik.tree", {
                         return $parentNode.data.id;
                     });
 
-                    $self.nodeToLoadId = $self.nodeToLoadId.concat($needIds);
-                    $self.nodeToLoadId = [...new Set($self.nodeToLoadId)];
-                    $self.nodeToLoadId = $self.nodeToLoadId.filter(Boolean);
+                    $self._nodeToLoadId = $self._nodeToLoadId.concat($needIds);
+                    $self._nodeToLoadId = [...new Set($self._nodeToLoadId)];
+                    $self._nodeToLoadId = $self._nodeToLoadId.filter(Boolean);
 
                     let $root = $self.getRootNode();
                     let $nodes = $root.children;
@@ -324,16 +327,16 @@ $.widget("kr0lik.tree", {
 
         let $checkId = String($node.data.id);
 
-        let $searchSelection = this.nodeToSelectId.indexOf(String($checkId));
+        let $searchSelection = this._nodeToSelectId.indexOf(String($checkId));
         if ($searchSelection > -1) {
-            this.nodeToSelectId.splice($searchSelection, 1); // First remove from nodeToSelectId
+            this._nodeToSelectId.splice($searchSelection, 1); // First remove from _nodeToSelectId
             $node.setSelected(true);
         }
 
         if (!$node.isLoaded() && !$node.isLoading()) {
             $node.load(true);
         } else {
-            let $findIndex = this.nodeToLoadId.indexOf($node.data.id);
+            let $findIndex = this._nodeToLoadId.indexOf($node.data.id);
             if (
                 $findIndex > -1
                 && $node.isLoaded()

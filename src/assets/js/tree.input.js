@@ -1,5 +1,5 @@
 $.widget("kr0lik.treeInput", {
-    tree: null,
+    _tree: null,
 
     treeContainerClass: '.fancytree-connectors',
     inpitFieldClass: '.tree-input-field',
@@ -62,10 +62,10 @@ $.widget("kr0lik.treeInput", {
         };
     },
     _initTree: function () {
-        this.tree = $.kr0lik.tree(this._getOptions(), this.getTreeContainer());
+        this._tree = $.kr0lik.tree(this._getOptions(), this.getTreeContainer());
     },
     getTree: function () {
-        return this.tree;
+        return this._tree;
     },
     activate: function ($node) {
         if (this._isSelectable($node)) {
@@ -120,7 +120,7 @@ $.widget("kr0lik.treeInput", {
 
             this.getInputList().html($titles.join('<br />'));
 
-            if (this.getTree().nodeToSelectId.length > 0) {
+            if (this.getTree().getNeedToSelectId().length > 0) {
                 this.getInputList().append(this.loader);
             }
         } else {
