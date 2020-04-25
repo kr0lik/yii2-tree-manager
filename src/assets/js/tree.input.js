@@ -23,10 +23,11 @@ $.widget("kr0lik.treeInput", {
     _create: function() {
         this._validate();
         this._initTree();
-        if (!this.options.selectId.length) {
-            this._clearInput();
-        } else {
+
+        if (this.options.selectId.length > 0) {
             this.getInputList().append(this.loader);
+        } else {
+            this._clearInput();
         }
     },
     _refresh: function() {
@@ -51,7 +52,7 @@ $.widget("kr0lik.treeInput", {
                 let $node = $data.node,
                     $type = this.options.multiple ? 'checkbox' : 'radio';
 
-                if (!this._isSelectable($node)) {
+                if (false === this._isSelectable($node)) {
                     return false;
                 }
 
@@ -68,12 +69,16 @@ $.widget("kr0lik.treeInput", {
         return this._tree;
     },
     activate: function ($node) {
-        if (this._isSelectable($node)) {
+        if (true === this._isSelectable($node)) {
             $node.setSelected(true);
         }
     },
     select: function ($node) {
-        this._updateSelection($node);
+        if (true === this._isSelectable($node)) {
+            this._updateSelection($node);
+        }
+    },
+    renderNode: function ($node) {
     },
     showError: function ($message) {
         this.getTree().showError($message);
@@ -96,28 +101,26 @@ $.widget("kr0lik.treeInput", {
         return !(this.options.leavesOnly && $node.isFolder());
     },
     _updateSelection: function ($node) {
-        var $tree = this.getTree();
+        let $selections = this._getSelections();
 
-        if ($tree.getSelectedNodes().length > 0) {
-            let $titles = [],
-                $ids = [];
-
-            $.each($tree.getSelectedNodes(), ($index, $node) => {
-                let $title = this.getTree().getBreadCrumbs($node, '/') + $node.title;
-                $titles.push($title);
-                $ids.push($node.data.id);
-            });
-
+        if (Object.keys($selections).length > 0) {
             if (this.options.multiple) {
-                this.getInputField().html('');
-                $.each($ids, ($index, $id) => {
-                    let $title = $titles[$index];
-                    this.getInputField().append('<option value="'+$id+'" selected="selected">'+$title+'</option>');
-                });
+                let $selectOptions = '';
+                for(let $id in $selections) {
+                    if(true === $selections.hasOwnProperty($id)) {
+                        let $title = $selections[$id] ?? $id;
+                        $selectOptions += `<option value="${$id}" selected="selected">${$title}</option>`;
+                    }
+                }
+
+                this.getInputField().html($selectOptions);
             } else {
                 this.getInputField().val($ids.join(','));
             }
 
+            $titles = Object.values($selections);
+            $titles = $titles.filter(Boolean);
+            
             this.getInputList().html($titles.join('<br />'));
 
             if (this.getTree().getNeedToSelectId().length > 0) {
@@ -127,12 +130,29 @@ $.widget("kr0lik.treeInput", {
             this._clearInput();
         }
 
-        $(document).trigger('treeInputChange', [$tree.getSelectedNodes()]);
+        $(document).trigger('treeInputChange', [this.getTree().getSelectedNodes()]);
+    },
+    _getSelections: function () {
+        var $tree = this.getTree();
+        let $selections = new Object();
+
+        $.each($tree.getSelectedNodes(), ($index, $node) => {
+            let $title = $tree.getBreadCrumbs($node, '/') + $node.title.bold();
+            $selections[$node.data.id] = $title;
+        });
+
+        $.each($tree.getNeedToSelectId(), ($index, $id) => {
+            if (false === $selections.hasOwnProperty($id)) {
+                $selections[$id] = null;
+            }
+        });
+
+        return $selections;
     },
     _clearInput: function () {
         this.getInputList().text(this.options.messages.select);
 
-        if (this.options.multiple) {
+        if (true === this.options.multiple) {
             this.getInputField().html('');
         } else {
             this.getInputField().val('');

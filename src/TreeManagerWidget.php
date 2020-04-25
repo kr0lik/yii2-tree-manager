@@ -35,6 +35,10 @@ class TreeManagerWidget extends Widget
     /**
      * @var bool
      */
+    public $firstRootActivateDefault = true;
+    /**
+     * @var bool
+     */
     public $dndEnable = true;
     /**
      * @var array<string, string>
@@ -79,6 +83,10 @@ class TreeManagerWidget extends Widget
         if (!is_bool($this->dndEnable)) {
             throw new InvalidConfigException('DndEnable must be boolean.');
         }
+
+        if (!is_bool($this->firstRootActivateDefault)) {
+            throw new InvalidConfigException('FirstRootActivateDefault must be boolean.');
+        }
     }
 
     private function prepare(): void
@@ -86,6 +94,7 @@ class TreeManagerWidget extends Widget
         $this->treeConfig['pathAction'] = $this->pathAction;
         $this->treeConfig['multipleRoots'] = $this->multipleRoots;
         $this->treeConfig['activeId'] = $this->activeId;
+        $this->treeConfig['firstRootActivateDefault'] = $this->firstRootActivateDefault;
         if (!$this->dndEnable) {
             $this->treeConfig['dnd5'] = null;
         }

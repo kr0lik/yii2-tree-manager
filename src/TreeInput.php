@@ -34,6 +34,10 @@ class TreeInput extends InputWidget
      */
     public $multiple = false;
     /**
+     * @var bool
+     */
+    public $collapse = true;
+    /**
      * @var array<string, string>
      */
     public $messages = [];
@@ -62,6 +66,7 @@ class TreeInput extends InputWidget
         return $this->render($this->viewPath, [
             'options' => $this->treeOptions,
             'inputField' => $inputField,
+            'collapse' => $this->collapse,
         ]);
     }
 
@@ -80,11 +85,13 @@ class TreeInput extends InputWidget
         $this->options['style'] = 'display: none;'.($style ? " $style" : '');
         $this->options['multiple'] = 'multiple';
 
+        $items = array_combine($this->getSelectId(), $this->getSelectId());
+
         if ($this->hasModel()) {
-            return Html::activeListBox($this->model, $this->attribute, $this->getSelectId(), $this->options);
+            return Html::activeListBox($this->model, $this->attribute, $items, $this->options);
         }
 
-        return Html::listBox($this->name, $this->getSelectId(), $this->value, $this->options);
+        return Html::listBox($this->name, $this->getSelectId(), $items, $this->options);
     }
 
     /**
@@ -102,6 +109,14 @@ class TreeInput extends InputWidget
 
         if (!is_bool($this->multiple)) {
             throw new InvalidConfigException('Multiple must be boolean.');
+        }
+
+        if (!is_bool($this->collapse)) {
+            throw new InvalidConfigException('Collapse must be boolean.');
+        }
+
+        if ($this->multiple && $this->value && !is_array($this->value)) {
+            throw new InvalidConfigException('Value must be array for multiple input.');
         }
     }
 
@@ -144,12 +159,12 @@ class TreeInput extends InputWidget
 
         if ($this->hasModel() && !$this->value) {
             $selectId = Html::getAttributeValue($this->model, $this->attribute);
+
+            if ($selectId && !is_array($selectId)) {
+                $selectId = explode(',', $selectId);
+            }
         } else {
             $selectId = $this->value;
-        }
-
-        if ($selectId && !is_array($selectId)) {
-            $selectId = explode(',', $selectId);
         }
 
         return array_map('trim', (array) $selectId);

@@ -1,6 +1,7 @@
 $.widget("kr0lik.tree", {
     _nodeToLoadId: [],
     _nodeToSelectId: [],
+    _needToActiveId: null,
 
     treeContainerClass: '.tree-container',
     treeSearchInputClass: '.tree-search-input',
@@ -88,7 +89,7 @@ $.widget("kr0lik.tree", {
                     $node.addNode($response.data);
                 } else {
                     $data.result = {
-                        error: "ERROR #" + $response.faultCode + ": " + $response.faultMsg
+                        error: `ERROR #${$response.faultCode}: ${$response.faultMsg}`
                     }
                 }
             },
@@ -104,14 +105,19 @@ $.widget("kr0lik.tree", {
                 // Load on render
                 this.loadNode($node);
 
+                // highlight on search
                 if ($node.titleWithHighlight && $node.match) {
                     $($node.span).find('span.fancytree-title').html($node.titleWithHighlight);
                 }
+
+                this.options.plugins.forEach(function(plugin){
+                    plugin.renderNode($node);
+                });
             },
             renderTitle: ($event, $data) => {
                 var $node = $data.node;
 
-                let $spanTitle = '<span class="fancytree-title">' + $node.title + '</span>',
+                let $spanTitle = `<span class="fancytree-title">${$node.title}</span>`,
                     $spanCounter = '';
 
                 if ($node.data.countAll != null || $node.data.countActive != null) {
@@ -122,7 +128,7 @@ $.widget("kr0lik.tree", {
                         $str += $node.data.countActive;
                     }
 
-                    $spanCounter = '<small class="fancytree-count">(' + $str + ')</small>';
+                    $spanCounter = `<small class="fancytree-count">(${$str})</small>`;
                 }
 
                 return $spanTitle + $spanCounter
@@ -144,7 +150,7 @@ $.widget("kr0lik.tree", {
                 var $node = $data.node;
 
                 let $selectedNodes = $data.tree.getSelectedNodes();
-                this.options.selectId = $.map($selectedNodes, function($selectedNode){
+                this.options.selectId = $.map($selectedNodes, function($selectedNode) {
                     return $selectedNode.data.id;
                 });
 
@@ -159,7 +165,7 @@ $.widget("kr0lik.tree", {
                     $node.load(false);
                 }
 
-                this.options.activeId = $node.data.id;
+                this._needToActiveId = $node.data.id;
 
                 this.options.plugins.forEach(function(plugin){
                     plugin.activate($node);
@@ -209,40 +215,42 @@ $.widget("kr0lik.tree", {
     getNeedToSelectId: function () {
         return this._nodeToSelectId;
     },
+    getNeedToActiveId: function () {
+        return this._needToActiveId;
+    },
     _initSelections: function () {
-        var $self = this;
-
         this._nodeToSelectId = $.map(this.options.selectId, function($id){
             return String($id);
         });
+        this._needToActiveId = this.options.activeId;
 
-        let $ids = [...this._nodeToSelectId];
-        $ids.push(this.options.activeId);
+        // Colect unique ids
+        var $ids = [...this._nodeToSelectId];
+        $ids.push(this._needToActiveId);
         $ids = [...new Set($ids)];
         $ids = $ids.filter(Boolean);
 
-        $.each($ids, function($index, $id) {
-            $.get($self.options.pathAction, {action: 'getParents', targetId: $id}, function ($result) {
+        $.each($ids, ($index, $id) => {
+            $.get(this.options.pathAction, {action: 'getParents', targetId: $id}, ($result) => {
                 if ($result.success) {
-                    let $needIds = $result.data.map(function callback($parentNode) {
+                    let $needIds = $result.data.map(function ($parentNode) {
                         return $parentNode.data.id;
                     });
 
-                    $self._nodeToLoadId = $self._nodeToLoadId.concat($needIds);
-                    $self._nodeToLoadId = [...new Set($self._nodeToLoadId)];
-                    $self._nodeToLoadId = $self._nodeToLoadId.filter(Boolean);
+                    // Collect unique ids
+                    this._nodeToLoadId = this._nodeToLoadId.concat($needIds);
+                    this._nodeToLoadId = [...new Set(this._nodeToLoadId)];
+                    this._nodeToLoadId = this._nodeToLoadId.filter(Boolean);
 
-                    let $root = $self.getRootNode();
-                    let $nodes = $root.children;
-
-                    $.each($nodes, function($index, $node) {
-                        $self.loadNode($node);
+                    // Start from roots
+                    $.each(this.getRootNode().children, ($index, $node) => {
+                        this.loadNode($node);
                     });
                 } else {
-                    $self.showError($result.message);
+                    this.showError($result.message);
                 }
-            }, "json").fail(function($response) {
-                $self.showError($response.responseJSON.message);
+            }, "json").fail($response => {
+                this.showError($response.statusText);
             });
         });
     },
@@ -250,7 +258,7 @@ $.widget("kr0lik.tree", {
         var $self = this,
             $tree = this.getTree();
 
-        $($self.treeSearchInputClass).on("keyup", function(e){
+        $($self.treeSearchInputClass).on("keyup", function(e) {
             let $count,
                 $opts = $self.options.filter,
                 $filterFunc = $self.options.filter.leavesOnly ? $tree.filterBranches : $tree.filterNodes,
@@ -287,7 +295,7 @@ $.widget("kr0lik.tree", {
 
         return $parentNodes;
     },
-    getBreadCrumbs: function ($node, $separator = ' / ') {
+    getBreadCrumbs: function ($node, $separator = '/') {
         let $crumbs = this.getParentNodes($node).map(function($parentNode) {
             return $parentNode.title;
         });
@@ -317,34 +325,33 @@ $.widget("kr0lik.tree", {
                 this.showError($result.message);
             }
         }, "json").fail(($response) => {
-            this.showError($response.responseJSON.message);
+            this.showError($response.statusText);
         });
     },
     loadNode: function ($node) {
-        if ($node.data.id === this.options.activeId) {
+        if ($node.data.id === this._needToActiveId) {
+            this._needToActiveId = null;
             $node.setActive(true);
         }
 
         let $checkId = String($node.data.id);
-
-        let $searchSelection = this._nodeToSelectId.indexOf(String($checkId));
+        let $searchSelection = this._nodeToSelectId.indexOf($checkId);
         if ($searchSelection > -1) {
-            this._nodeToSelectId.splice($searchSelection, 1); // First remove from _nodeToSelectId
+            // First remove from _nodeToSelectId and then call setSelected
+            this._nodeToSelectId.splice($searchSelection, 1);
             $node.setSelected(true);
         }
 
-        if (!$node.isLoaded() && !$node.isLoading()) {
+        if (false === $node.isLoaded() && false === $node.isLoading()) {
             $node.load(true);
         } else {
             let $findIndex = this._nodeToLoadId.indexOf($node.data.id);
-            if (
-                $findIndex > -1
-                && $node.isLoaded()
-                && $node.children
-                && $node.children.length > 0
-                && !$node.expanded
-            ) {
-                $node.setExpanded(true);
+            if ($findIndex > -1 && true === $node.isLoaded()) {
+                this._nodeToLoadId.splice($findIndex, 1);
+
+                if (null !== $node.children && $node.children.length > 0 && !$node.expanded) {
+                    $node.setExpanded(true);
+                }
             }
         }
     },

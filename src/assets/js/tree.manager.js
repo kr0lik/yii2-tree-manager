@@ -18,6 +18,7 @@ $.widget("kr0lik.treeManager", {
     options: {
         pathAction: null,
         activeId: null,
+        firstRootActivateDefault: true,
         multipleRoots: true,
 
         messages: {
@@ -61,7 +62,6 @@ $.widget("kr0lik.treeManager", {
     _validate: function () {
         if (!this.options.pathAction) {
             this.showError('PathAction option required!');
-
             this._destroy();
         }
     },
@@ -83,7 +83,7 @@ $.widget("kr0lik.treeManager", {
                 return true;
             };
             $options.dnd5.dragEnter = ($node, $data) => {
-                if ($node.getLevel() <= 1 && !this.options.multipleRoots) return false;  // Do not drag to root
+                if ($node.getLevel() <= 1 && false === this.options.multipleRoots) return false;  // Do not drag to root
                 if (!$data.otherNode.data.id) return false; // Do not drag new nodes
 
                 return true;
@@ -93,13 +93,13 @@ $.widget("kr0lik.treeManager", {
                     $tree = this.getTree();
 
                 $.get(this.options.pathAction, {action: "move", mode: $data.hitMode, targetId: $targetNode.data.id, hitId: $hitNode.data.id}, ($result) => {
-                   if ($result.success) {
+                   if (true === $result.success) {
                        var $tree = this.getTree();
 
                        let $startNode = $targetNode.parent; // Not move this variable!
 
                        $targetNode.moveTo($hitNode, $data.hitMode);
-                       if (!$hitNode.expanded && $data.hitMode == "over") {
+                       if (false === $hitNode.expanded && "over" === $data.hitMode) {
                            $hitNode.setExpanded(true);
                        }
 
@@ -108,7 +108,7 @@ $.widget("kr0lik.treeManager", {
 
                        $nodesToUpdate = $nodesToUpdate.concat(
                            $tree.getParentNodes($hitNode).reverse().filter(($parentNode) => {
-                               $.each($nodesToUpdate, function($index, $nodeToUpdate) {
+                               $.each($nodesToUpdate, ($index, $nodeToUpdate) => {
                                    if ($parentNode.data.id === $nodeToUpdate.data.id) {
                                        return true;
                                    }
@@ -122,14 +122,14 @@ $.widget("kr0lik.treeManager", {
                            $tree.updateNode($nodeToUpdate, false);
                        });
 
-                       this.getBreadCrumbsPlaces().text($tree.getBreadCrumbs($targetNode));
+                       this._updateBreadCrumbsPlaces($targetNode);
 
                        $(document).trigger('treeElementAfterMove', [$targetNode, $hitNode]);
                    } else if ($result.message) {
                        this.showError($result.message);
                    }
                 }).fail(($response) => {
-                    this.showError($response.responseJSON.message);
+                    this.showError($response.statusText);
                 });
             };
         }
@@ -146,6 +146,22 @@ $.widget("kr0lik.treeManager", {
         this._formPrepare($node)
     },
     select: function ($node) {
+    },
+    renderNode: function ($node) {
+        var $tree = this.getTree();
+        if (null !== $tree) {
+            if (null === $tree.getNeedToActiveId()) {
+                if (true === this.options.firstRootActivateDefault) {
+                    // Activate root by default
+                    let $rootNode = this.getTree().getRootNode().getFirstChild();
+                    if ($node.data.id && $rootNode.data.id === $node.data.id) {
+                        $node.setActive(true);
+                    }
+                } else {
+                    this.getFormContainer().html(`<div class="panel-body">${this.options.messages.notSelected}</div>`);
+                }
+            }
+        }
     },
     showError: function ($message) {
         this.getTree().showError($message);
@@ -197,6 +213,13 @@ $.widget("kr0lik.treeManager", {
             });
         }
     },
+    _updateBreadCrumbsPlaces: function ($node) {
+        $crumbs = this.getTree().getBreadCrumbs($node);
+        this.getBreadCrumbsPlaces().text($crumbs);
+    },
+    _updateNamePlaces: function ($title) {
+        this.getUpdateNamePlaces().html($title.bold());
+    },
     _addTreeElement: function ($mode = 'child') { // $mode = 'after'
         var $tree = this.getTree();
         var $node = $tree.getActiveNode();
@@ -206,13 +229,13 @@ $.widget("kr0lik.treeManager", {
             $mode = 'child';
 
             let $rooChildren = $node.getChildren();
-            if ($rooChildren && $rooChildren.length && !this.options.multipleRoots) {
+            if (null !== $rooChildren && $rooChildren.length && !this.options.multipleRoots) {
                 this.showError(this.options.messages.notSelected);
                 return;
             }
         }
 
-        if ($node.data.disabled) {
+        if (true === $node.data.disabled) {
             this.showError(this.options.messages.hitNodeNotSaved);
             return;
         }
@@ -245,7 +268,7 @@ $.widget("kr0lik.treeManager", {
         } else if ($activeNode.data.id) {
             let $confirmation = confirm(this.options.messages.deleteConfirm.replace("{sectionName}", $activeNode.title));
 
-            if ($confirmation !== true) {
+            if (true !== $confirmation) {
                 return;
             }
         } else {
@@ -254,13 +277,13 @@ $.widget("kr0lik.treeManager", {
         }
 
         $.get(this.options.pathAction, {action: 'delete', targetId: $activeNode.data.id}, ($result) => {
-            if ($result.success) {
+            if (true === $result.success) {
                 this._removeTreeElement($activeNode);
             } else {
                 this.showError($result.message);
             }
         }, "json").fail(($response) => {
-            this.showError($response.responseJSON.message);
+            this.showError($response.statusText);
         });
     },
     _removeTreeElement: function ($node) {
@@ -278,12 +301,14 @@ $.widget("kr0lik.treeManager", {
         $(document).trigger('treeElementAfterRemove', [$node]);
     },
     _formPrepare: function ($editedNode) {
-        var $formContainer = this.getFormContainer();
+        this._updateBreadCrumbsPlaces($editedNode);
+        this._updateNamePlaces($editedNode.title);
 
-        $formContainer.html('<div class="loader form-loader"><i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i></div>');
+        var $formContainer = this.getFormContainer();
+        $formContainer.html('<div class="loader form-loader text-center"><i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i></div>');
 
         $.get(this.options.pathAction, this._formGetQuery($editedNode), ($result) => {
-            if ($result.success) {
+            if (true === $result.success) {
                 $formContainer.html($result.data.form);
 
                 var $form = $formContainer.find('form');
@@ -296,7 +321,7 @@ $.widget("kr0lik.treeManager", {
                 this._formShowError($result.message);
             }
         }, "json").fail(($response) => {
-            this._formShowError($response.responseJSON.message);
+            this._formShowError($response.statusText);
         });
     },
     _formBindActions: function ($form, $editedNode) {
@@ -314,8 +339,8 @@ $.widget("kr0lik.treeManager", {
 
         $editedNode.setTitle($name);
 
-        this.getUpdateNamePlaces().text($editedNode.title);
-        this.getBreadCrumbsPlaces().text($tree.getBreadCrumbs($editedNode));
+        this._updateBreadCrumbsPlaces($editedNode);
+        this._updateNamePlaces($editedNode.title);
     },
     _formGetQuery: function ($node) {
         var $query = {
@@ -325,7 +350,7 @@ $.widget("kr0lik.treeManager", {
         };
 
         if ($node.data.id) {
-            $query.mode = ''; // Edit;
+            $query.mode = ''; // Edit mode;
         } else {
             let $prev = $node.getPrevSibling();
 
@@ -353,78 +378,90 @@ $.widget("kr0lik.treeManager", {
         var $self = this,
             $tree = this.getTree();
 
-        $form.find($self.formInputNameClass).bind("keyup", function() {
+        $form.find(this.formInputNameClass).bind("keyup", function() {
             let $name = $(this).val();
 
-            $self.getUpdateNamePlaces().text($name);
+            $self._updateNamePlaces($name);
 
             $node.setTitle($name);
         });
     },
     _formBindSubmit: function ($form, $editedNode) {
-        var $self = this,
-            $formContainer = this.getFormContainer(),
-            $submitButton = $form.find($self.formSubmitButtonClass),
-            $errorMessageContainer = $form.find($self.formErrorMessageClass);
+        var $submitButton = $form.find(this.formSubmitButtonClass),
+            $errorMessageContainer = $form.find(this.formErrorMessageClass),
+            $defaultSubmitText = $submitButton.text();
 
-        $form.on('beforeSubmit', function ($event, $jqXHR, $settings) {
-            var $defaultSubmitText = $submitButton.html();
-            $submitButton.html($defaultSubmitText + '<i class="fa fa-spinner fa-pulse fa-fw"></i>');
+        // Validate
+        $form.on('beforeSubmit', ($event, $jqXHR, $settings) => {
+            $submitButton.html(`${$defaultSubmitText} <i class="fa fa-spinner fa-pulse fa-fw"></i>`);
 
-            $.post($self.options.pathAction + '?action=validate', $form.serialize(), function($result) {
-                if ($result.success) {
-                    $.post($form.attr('action'), $form.serialize(), function($result) {
-                        $submitButton.html($defaultSubmitText);
-
-                        if ($result.success) {
-                            $editedNode.data.disabled = false;
-                            $editedNode.data.id = $result.data.data.id;
-
-                            $form.find($self.formSuccessMessageClass).fadeIn();
-                            $errorMessageContainer.hide();
-
-                            $self.getTree().updateNode($editedNode.parent, false);
-
-                            setTimeout(function () {
-                                $($self.formSuccessMessageClass).fadeOut();
-                            }, 9000);
-
-                            $(document).trigger('treeFormAfterSubmit', [$form, $editedNode]);
+            new Promise((resolve, reject) => {
+                $.post(this.options.pathAction + '?action=validate', $form.serialize(), ($result) => {
+                    if (true === $result.success) {
+                        resolve($result);
+                    } else if ($result.data.validations) {
+                        $submitButton.html(`${$defaultSubmitText} <i class="save-error fa fa-close fa-xs text-danger"></i>`);
+                        $form.yiiActiveForm('updateMessages', $result.data.validations, true);
+                    } else {
+                        reject($response.responseJSON.message);
+                    }
+                }).fail($response => {
+                    reject($response.statusText);
+                });
+            }).then($result => {
+                // Submit
+                return new Promise((resolve, reject) => {
+                    $.post($form.attr('action'), $form.serialize(), ($result) => {
+                        if (true === $result.success) {
+                            resolve($result);
                         } else if ($result.data.validations) {
+                            $submitButton.html(`${$defaultSubmitText} <i class="save-error fa fa-close fa-xs text-danger"></i>`);
                             $form.yiiActiveForm('updateMessages', $result.data.validations, true);
                         } else {
-                            $errorMessageContainer.text($result.message).show();
+                            reject($result.message);
                         }
-                    }, "json").fail(function($response) {
-                        $submitButton.html($defaultSubmitText);
-                        $errorMessageContainer.text($response.responseJSON.message).show();
+                    }, "json").fail($response => {
+                        reject($response.statusText);
                     });
-                } else if ($result.data.validations) {
-                    $submitButton.html($defaultSubmitText);
-                    $form.yiiActiveForm('updateMessages', $result.data.validations, true);
-                } else {
-                    $submitButton.html($defaultSubmitText);
-                    $errorMessageContainer.text($response.responseJSON.message).show();
-                }
+                });
+            }).then($result => {
+                // Success
+                $submitButton.html(`${$defaultSubmitText} <i class="save-success fa fa-check fa-xs"></i>`);
+                $errorMessageContainer.hide();
+
+                $editedNode.data.disabled = false;
+                $editedNode.data.id = $result.data.data.id;
+
+                this.getTree().updateNode($editedNode.parent, false);
+
+                setTimeout(() => {
+                    $submitButton.find('.save-success').fadeOut(() => {
+                        $submitButton.html($defaultSubmitText);
+                    });
+                }, 5000);
+
+                $(document).trigger('treeFormAfterSubmit', [$form, $editedNode]);
+            }).catch($err => {
+                // Error
+                $submitButton.html(`${$defaultSubmitText} <i class="save-error fa fa-close fa-xs text-danger"></i>`);
+                $errorMessageContainer.text($err).show();
             });
 
             return false;
         });
 
-        $form.bind("submit", function () { return false; });
+        $form.bind("submit", () => { return false; });
     },
     _formBindReset: function ($form, $editedNode) {
-        var $self = this;
-
         $form.find(this.formCancelButtonClass).bind("click", function () {
             $($form).trigger('reset.yiiActiveForm');
 
-            $self._formUpdateData($form, $editedNode);
+            this._formUpdateData($form, $editedNode);
 
             $(document).trigger('treeFormAfterReset', [$form, $editedNode]);
-        });
+        }.bind(this));
     },
     _formShowError: function ($message) {
-        this.getFormContainer().html('<p class="error form-error text-danger">'+$message+'</p>');
+        this.getFormContainer().html(`<p class="error form-error text-danger">${$message}</p>`);
     },
 });

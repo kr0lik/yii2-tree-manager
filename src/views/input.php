@@ -4,6 +4,7 @@ use yii\helpers\{ArrayHelper, Html};
 /**
  * @var array<string, mixed> $options
  * @var string $inputField
+ * @var bool $collapse
  */
 
 $tag = ArrayHelper::remove($options, 'tag', 'div');
@@ -20,7 +21,7 @@ $id = ArrayHelper::getValue($options, 'id');
                 'data-toggle' => 'collapse'
             ]
         ) ?>
-        <div id="<?= $id ?>-dropdown-toggle" class="collapse tree-input-collapse panel panel-info">
+        <div id="<?= $id ?>-dropdown-toggle" class="<?= $collapse ? 'collapse ' : '' ?>tree-input-collapse panel panel-info">
             <?= $this->render('tree') ?>
         </div>
         <?= $inputField ?>

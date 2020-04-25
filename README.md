@@ -94,8 +94,9 @@ Optional:
 * treeOptions: array - Container tag options.
 * multipleRoots: bool - Allow multiple roots. Default: false.
 * activeId: int - ID active node by default.
-* dndEnable: bool - for dissable drag and drop set null or false.  Default: true.
+* dndEnable: bool - for dissable drag and drop set null or false. Default: true.
 * viewPath - path to view of manager.
+* firstRootActivateDefault - Activate first root on load if no activeId. Default: true.
 
 ```php
 <?php
@@ -165,6 +166,7 @@ Optional:
 * multiple: bool - Select multiple nodes. Default: false.
 * options: array - input options.
 * viewPath: string - path to view of input.
+* collapse: bool - collapse tree. Default: true.
 
 Example:
 ```php

@@ -23,8 +23,17 @@ $tag = ArrayHelper::remove($options, 'tag', 'div');
                 </div>
             </div>
         </div>
-        <div class="col-xs-12 col-sm-6 tree-manager-form-container">
+        <div class="col-xs-12 col-sm-6">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <span class="tree-breadcrumbs"></span><span class="tree-update-name"></span>
+                </div>
+                <div class="tree-manager-form-container">
+                    <div class="panel-body">
 
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 <?= Html::endTag($tag); ?>
