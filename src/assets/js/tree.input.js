@@ -1,13 +1,11 @@
-$.widget("kr0lik.treeInput", {
-    _tree: null,
+kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
+    static treeInputFieldClass = '.tree-input-field'
+    static treeInputListClass = '.tree-input-list'
+    static treeContainerClass = '.tree-container'
 
-    treeContainerClass: '.fancytree-connectors',
-    inpitFieldClass: '.tree-input-field',
-    inputListClass: '.tree-input-list',
+    loader = '<div class="loader text-left"><i class="fa fa-spinner fa-pulse fa-xs fa-fw"></i></div>'
 
-    loader: '<div class="loader text-left"><i class="fa fa-spinner fa-pulse fa-xs fa-fw"></i></div>',
-
-    options: {
+    #options = {
         pathAction: null,
         leavesOnly: true,
         multiple: false,
@@ -19,143 +17,126 @@ $.widget("kr0lik.treeInput", {
             loadError: "Load error!",
             noData: "No data."
         },
-    },
-    _create: function() {
-        this._validate();
-        this._initTree();
-
-        if (this.options.selectId.length > 0) {
-            this.getInputList().append(this.loader);
-        } else {
-            this._clearInput();
-        }
-    },
-    _refresh: function() {
-        this._trigger( "change" );
-    },
-    _setOptions: function() {
-        this._superApply( arguments );
-    },
-    _setOption: function($key, $value) {
-        this._super($key, $value);
-    },
-
-    // base
-    _validate: function () {
-    },
-    _getOptions: function () {
+    }
+    #getTreeOptions = function() {
         return  {
-            pathAction: this.options.pathAction,
-            selectId: this.options.selectId,
-            selectMode: this.options.multiple ? 2 : 1,
+            pathAction: this.#options.pathAction,
+            selectId: this.#options.selectId,
+            plugins: [this],
+            selectMode: this.#options.multiple ? 2 : 1,
             checkbox: ($event, $data) => {
                 let $node = $data.node,
-                    $type = this.options.multiple ? 'checkbox' : 'radio';
+                    $type = this.#options.multiple ? 'checkbox' : 'radio';
 
-                if (false === this._isSelectable($node)) {
+                if (false === this.#isSelectable($node)) {
                     return false;
                 }
 
                 return $type;
             },
             plugins: [this],
-            messages: this.options.messages,
+            messages: this.#options.messages,
         };
-    },
-    _initTree: function () {
-        this._tree = $.kr0lik.tree(this._getOptions(), this.getTreeContainer());
-    },
-    getTree: function () {
-        return this._tree;
-    },
-    activate: function ($node) {
-        if (true === this._isSelectable($node)) {
-            $node.setSelected(true);
+    }
+    #setOptions = function(options) {
+        this.#options = Object.assign(this.#options, options);
+    }
+    #validate = function () {
+        if (!this.#options.pathAction) {
+            throw Error('PathAction option required!');
         }
-    },
-    select: function ($node) {
-        if (true === this._isSelectable($node)) {
-            this._updateSelection($node);
-        }
-    },
-    renderNode: function ($node) {
-    },
-    showError: function ($message) {
-        this.getTree().showError($message);
-    },
+    }
+    #isSelectable = function(node) {
+        return !(this.#options.leavesOnly && node.isFolder());
+    }
+    #updateSelection = function(node, treeComponent) {
+        let selections = this.#getSelections(treeComponent);
 
-    // app
-    getMainContainer: function () {
-        return $(this.element);
-    },
-    getTreeContainer: function () {
-        return this.getMainContainer().find(this.treeContainerClass);
-    },
-    getInputList: function () {
-        return this.getMainContainer().find(this.inputListClass);
-    },
-    getInputField: function () {
-        return this.getMainContainer().find(this.inpitFieldClass);
-    },
-    _isSelectable: function ($node) {
-        return !(this.options.leavesOnly && $node.isFolder());
-    },
-    _updateSelection: function ($node) {
-        let $selections = this._getSelections();
-
-        if (Object.keys($selections).length > 0) {
-            if (this.options.multiple) {
-                let $selectOptions = '';
-                for(let $id in $selections) {
-                    if(true === $selections.hasOwnProperty($id)) {
-                        let $title = $selections[$id] ?? $id;
-                        $selectOptions += `<option value="${$id}" selected="selected">${$title}</option>`;
+        if (Object.keys(selections).length > 0) {
+            if (this.#options.multiple) {
+                let selectOptions = '';
+                for(let selectId in selections) {
+                    if(true === selections.hasOwnProperty(selectId)) {
+                        let title = selections[selectId] ?? selectId;
+                        selectOptions += `<option value="${selectId}" selected="selected">${title}</option>`;
                     }
                 }
 
-                this.getInputField().html($selectOptions);
+                this._getTreeInputFieldElelent().html(selectOptions);
             } else {
-                this.getInputField().val($ids.join(','));
+                selectIds = Object.keys(selections);
+                selectIds = selectIds.filter(Boolean);
+
+                this._getTreeInputFieldElelent().val(selectIds.join(','));
             }
 
-            $titles = Object.values($selections);
-            $titles = $titles.filter(Boolean);
-            
-            this.getInputList().html($titles.join('<br />'));
+            let selectTitles = Object.values(selections);
+            selectTitles = selectTitles.filter(Boolean);
 
-            if (this.getTree().getNeedToSelectId().length > 0) {
-                this.getInputList().append(this.loader);
+            if (treeComponent.needToSelectId.length > 0) {
+                selectTitles.push(this.loader);
             }
+
+            this._getTreeInputListElelent().html(selectTitles.join('<br />'));
         } else {
-            this._clearInput();
+            this.#clearInput();
         }
 
-        $(document).trigger('treeInputChange', [this.getTree().getSelectedNodes()]);
-    },
-    _getSelections: function () {
-        var $tree = this.getTree();
-        let $selections = new Object();
+        $(document).trigger('treeInputChange', [treeComponent.selectedNodes]);
+    }
+    #getSelections = function(treeComponent) {
+        let selections = new Object();
 
-        $.each($tree.getSelectedNodes(), ($index, $node) => {
-            let $title = $tree.getBreadCrumbs($node, '/') + $node.title.bold();
-            $selections[$node.data.id] = $title;
+        treeComponent.selectedNodes.forEach(node => {
+            let selectedTitle = treeComponent.getBreadCrumbs(node, '/') + node.title.bold();
+            selections[node.data.id] = selectedTitle;
         });
 
-        $.each($tree.getNeedToSelectId(), ($index, $id) => {
-            if (false === $selections.hasOwnProperty($id)) {
-                $selections[$id] = null;
+        treeComponent.needToSelectId.forEach(id => {
+            if (false === selections.hasOwnProperty(id)) {
+                selections[id] = null;
             }
         });
 
-        return $selections;
-    },
-    _clearInput: function () {
-        this.getInputList().text(this.options.messages.select);
+        return selections;
+    }
+    #clearInput = function() {
+        this._getTreeInputListElelent().text(this.#options.messages.select);
 
-        if (true === this.options.multiple) {
-            this.getInputField().html('');
+        if (true === this.#options.multiple) {
+            this._getTreeInputFieldElelent().html('');
         } else {
-            this.getInputField().val('');
+            this._getTreeInputFieldElelent().val('');
         }
     }
-});
+
+    constructor(containerId, options) {
+        super();
+
+        this.$containerElement = $(`#${containerId}`);
+        this.#setOptions(options);
+
+        new kr0lik.treeComponent(this._getTreeContainerElelent(), this.#getTreeOptions());
+    }
+
+    _getTreeInputFieldElelent = () => {
+        return this.$containerElement.find(TreeInput.treeInputFieldClass);
+    }
+    _getTreeInputListElelent = () => {
+        return this.$containerElement.find(TreeInput.treeInputListClass);
+    }
+    _getTreeContainerElelent = () => {
+        return  this.$containerElement.find(TreeInput.treeContainerClass);
+    }
+
+    onSelect(node, treeComponent) {
+        if (true === this.#isSelectable(node)) {
+            this.#updateSelection(node, treeComponent);
+        }
+    }
+    onActivate(node, treeComponent) {
+        if (false === this.#options.multiple && true === this.#isSelectable(node)) {
+            node.setSelected(true);
+        }
+    }
+}

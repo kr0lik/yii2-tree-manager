@@ -62,6 +62,7 @@ class TreeResponse implements \JsonSerializable
             $result->setData([
                 'errors' => $exception->getErrors(),
                 'validations' => $exception->getValidations(),
+                'message' => $exception->getMessage(),
             ]);
         }
 

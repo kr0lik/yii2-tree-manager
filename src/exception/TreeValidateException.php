@@ -3,6 +3,7 @@ namespace kr0lik\tree\exception;
 
 use kr0lik\tree\exception\TreeException;
 use Throwable;
+use Yii;
 use yii\base\Model;
 use yii\helpers\Html;
 
@@ -22,7 +23,7 @@ class TreeValidateException extends TreeException
 
     public function getName(): string
     {
-        return 'Validation errors.';
+        return Yii::t('kr0lik.tree', 'Validation errors.');
     }
 
     /**

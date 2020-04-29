@@ -10,10 +10,11 @@ use yii\helpers\Html;
  * @var string[]|callable $fields
  * @var string[]|callable $links
  */
+
+ActiveForm::$autoIdPrefix = 'tree-manager-edit-form-';
 ?>
 
 <?php $form = ActiveForm::begin([
-    'id' => "tree-manager-edit-form",
     'action' => $actionUrl
 ]); ?>
     <div class="panel-body">

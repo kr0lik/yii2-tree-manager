@@ -124,6 +124,9 @@ class TreeManagerWidget extends Widget
     {
         TreeManagerAsset::register($this->getView());
 
-        $this->getView()->registerJs("$.kr0lik.treeManager(" . Json::encode($this->treeConfig) . ", '#{$this->treeOptions['id']}')");
+        $this->getView()
+            ->registerJs(
+                sprintf('new kr0lik.treeManager("%s", %s);', $this->treeOptions['id'], Json::encode($this->treeConfig))
+            );
     }
 }
