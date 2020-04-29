@@ -81,7 +81,7 @@ class TreeManagerController extends AbstractTreeController
         if (!$targetModel->validate($attributes)) {
             throw new TreeValidateException($targetModel);
         }
-
+        
         return TreeResponse::data([]);
     }
 

@@ -18,4 +18,5 @@ return [
     'loading' => 'loading tree...',
     'Load error' => 'Load error!',
     'No data' => 'No data!',
+    'Validation errors.' => 'Validation errors.',
 ];

@@ -26,7 +26,7 @@ $tag = ArrayHelper::remove($options, 'tag', 'div');
         <div class="col-xs-12 col-sm-6">
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <span class="tree-breadcrumbs"></span><span class="tree-update-name"></span>
+                    <span class="tree-node-breadcrumbs"></span><span class="tree-node-name"></span>
                 </div>
                 <div class="tree-manager-form-container">
                     <div class="panel-body">
