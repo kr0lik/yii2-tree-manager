@@ -236,7 +236,7 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         if (node.getLevel() > 1) {
             node.parent.setActive(true);
         } else {
-            this.getFormContainer().html('');
+            this._getFormContainerElelent().html('');
         }
 
         node.remove();
@@ -279,18 +279,17 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
     }
 
     onActivate(node, treeComponent) {
-        this.treeManagerForm.prepareForm(node, treeComponent, this)
+        this.treeManagerForm.prepareForm(node, treeComponent)
     }
     onRenderNode(node, treeComponent) {
         if (null === treeComponent.needToActiveId) {
             if (true === this.#options.firstRootActivateDefault) {
+                let rootNode = treeComponent.rootNode;
                 // Activate root by default
                 let firstRootNode = treeComponent.rootNode.getFirstChild();
 
                 if (node.data.id && firstRootNode.data.id === node.data.id) {
                     node.setActive(true);
-                } else if (!treeComponent.activeNode) {
-                    this._getFormContainerElelent().html(this.treeManagerForm.loader);
                 }
             } else {
                 this._getFormContainerElelent().html(`<div class="panel-body">${this.#options.messages.notSelected}</div>`);
@@ -454,13 +453,21 @@ kr0lik.treeManagerForm = class TreeManagerForm {
 
                     treeComponent.updateNode(editedNode.parent, false);
 
-                    setTimeout(() => {
-                        $submitButton.find('.save-success').fadeOut(() => {
-                            $submitButton.html(defaultSubmitText);
-                        });
-                    }, 5000);
-
                     $(document).trigger('treeFormAfterSubmit', [$form, editedNode]);
+
+                    this.#loadForm(editedNode, treeComponent).done(() => {
+                        let $submitButton = this._getFormSubmitButtonElement(),
+                            defaultSubmitText = $submitButton.text();;
+
+                        $submitButton
+                            .html(`${defaultSubmitText} <i class="save-success fa fa-xs fa-check"></i>`);
+
+                        setTimeout(() => {
+                            $submitButton.find('.save-success').fadeOut(() => {
+                                $submitButton.html(defaultSubmitText);
+                            });
+                        }, 3000);
+                    });
                 } else if (result.data.validations) {
                     $form.yiiActiveForm('updateMessages', result.data.validations, true);
                     throw result.message;
@@ -512,30 +519,34 @@ kr0lik.treeManagerForm = class TreeManagerForm {
         this.#setOptions(options);
     }
 
-    prepareForm(editedNode, treeComponent, context) {
+    prepareForm(editedNode, treeComponent) {
         this.#updateNodeBreadCrumbsElement(editedNode, treeComponent);
         this.#updateNodeNameElement(editedNode.title);
 
         this.$containerElement.html(this.loader);
 
-        $.get(
+        this.#loadForm(editedNode, treeComponent).done(() => {
+            $(document).trigger('treeFormAfterLoad', [$form, editedNode]);
+        });
+    }
+    #loadForm = function (editedNode, treeComponent) {
+        return $.get(
             this.#options.pathAction,
             this.#getQuery(editedNode),
+            result => {
+                if (true === result.success) {
+                    this.$containerElement.html(result.data.form);
+
+                    var $form = this.$containerElement.find('form');
+
+                    this.#prepareNodeData($form, editedNode, treeComponent);
+                    this.#bindActions($form, editedNode, treeComponent);
+                } else {
+                    this.showError(result.message);
+                }
+            },
             "json"
-        ).done(result => {
-            if (true === result.success) {
-                this.$containerElement.html(result.data.form);
-
-                var $form = this.$containerElement.find('form');
-
-                this.#prepareNodeData($form, editedNode, treeComponent);
-                this.#bindActions($form, editedNode, treeComponent);
-
-                $(document).trigger('treeFormAfterLoad', [$form, editedNode]);
-            } else {
-                this.showError(result.message);
-            }
-        }).fail(response => {
+        ).fail(response => {
             this.showError(response.statusText);
         });
     }

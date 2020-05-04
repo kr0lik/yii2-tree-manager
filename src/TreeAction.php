@@ -79,6 +79,8 @@ class TreeAction extends Action
                 return $this->getController()->getChildrensAction();
             case TreeActionEnum::GET_PARENTS:
                 return $this->getController()->getParentsAction();
+            case TreeActionEnum::GET_PATHS:
+                return $this->getController()->getPathsAction();
             case TreeActionEnum::GET_DATA:
                 return $this->getController()->getData();
             default:

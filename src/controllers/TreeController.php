@@ -50,6 +50,22 @@ class TreeController extends AbstractTreeController
     /**
      * @throws TreeNotFoundException
      */
+    public function getPathsAction(): TreeResponse
+    {
+        $targetId = Yii::$app->request->get('targetId');
+
+        /** @var TreeModelInterface $class */
+        $class = $this->repository->getTreeModelClass();
+        $models = $class::findTreePathsById($targetId);
+
+        return TreeResponse::data(array_map(function (TreeModelInterface $model) {
+            return $this->prepareModelData($model);
+        }, $models));
+    }
+
+    /**
+     * @throws TreeNotFoundException
+     */
     public function getData(): TreeResponse
     {
         $targetId = Yii::$app->request->get('targetId');

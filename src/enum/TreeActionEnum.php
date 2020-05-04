@@ -7,6 +7,7 @@ class TreeActionEnum
     public const GET_ROOTS = 'getRoots';
     public const GET_CHILDRENS = 'getChildrens';
     public const GET_PARENTS = 'getParents';
+    public const GET_PATHS = 'getPaths';
     public const GET_FORM = 'getForm';
     public const GET_DATA = 'getData';
 

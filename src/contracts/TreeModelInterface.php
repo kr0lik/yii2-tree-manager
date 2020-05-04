@@ -28,6 +28,12 @@ interface TreeModelInterface
     public static function findTreeModelById($id): ?TreeModelInterface;
 
     /**
+     * @param mixed|array<int, mixed>
+     * @return TreeModelInterface[]
+     */
+    public static function findTreePathsById($id): array;
+
+    /**
      * @return TreeModelInterface[]
      */
     public static function findTreeRoots(): array;

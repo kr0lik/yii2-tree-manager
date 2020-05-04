@@ -138,33 +138,9 @@ var kr0lik = {
             needIds = [...new Set(needIds)];
             needIds = needIds.filter(Boolean);
 
-            needIds.forEach(id => {
-                $.get(
-                    this.#options.pathAction,
-                    {action: 'getParents', targetId: id},
-                    "json"
-                ).done(result => {
-                    if (result.success) {
-                        let needToLoadIds = result.data.map(parentNode => {
-                            return parentNode.data.id;
-                        });
-
-                        // Collect unique ids
-                        this.#nodeToLoadId = this.#nodeToLoadId.concat(needToLoadIds);
-                        this.#nodeToLoadId = [...new Set(this.#nodeToLoadId)];
-                        this.#nodeToLoadId = this.#nodeToLoadId.filter(Boolean);
-
-                        // Start from roots
-                        this.rootNode.children.forEach(childrenNode => {
-                            this.loadNode(childrenNode);
-                        });
-                    } else {
-                        this.showError(result.message);
-                    }
-                }).fail(response => {
-                    this.showError(response.statusText);
-                });
-            });
+            if (needIds.length > 0) {
+                this.loadPaths(needIds);
+            }
         }
         #initSearch = function () {
             var self = this,
@@ -279,6 +255,33 @@ var kr0lik = {
             alert(message);
         }
 
+        loadPaths(id) {
+            $.get(
+                this.#options.pathAction,
+                {action: 'getPaths', targetId: id},
+                "json"
+            ).done(result => {
+                if (result.success) {
+                    let needToLoadIds = result.data.map(parentNode => {
+                        return parentNode.data.id;
+                    });
+
+                    // Collect unique ids
+                    this.#nodeToLoadId = this.#nodeToLoadId.concat(needToLoadIds);
+                    this.#nodeToLoadId = [...new Set(this.#nodeToLoadId)];
+                    this.#nodeToLoadId = this.#nodeToLoadId.filter(Boolean);
+
+                    // Start from roots
+                    this.rootNode.children.forEach(childrenNode => {
+                        this.loadNode(childrenNode);
+                    });
+                } else {
+                    this.showError(result.message);
+                }
+            }).fail(response => {
+                this.showError(response.statusText);
+            });
+        }
         loadNode(node) {
             if (node.data.id === this.#needToActiveId) {
                 this.#needToActiveId = null;

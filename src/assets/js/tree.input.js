@@ -49,7 +49,7 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
     #isSelectable = function(node) {
         return !(this.#options.leavesOnly && node.isFolder());
     }
-    #updateSelection = function(node, treeComponent) {
+    #updateSelections = function(treeComponent) {
         let selections = this.#getSelections(treeComponent);
 
         if (Object.keys(selections).length > 0) {
@@ -116,7 +116,9 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
         this.$containerElement = $(`#${containerId}`);
         this.#setOptions(options);
 
-        new kr0lik.treeComponent(this._getTreeContainerElelent(), this.#getTreeOptions());
+        var treeComponent = new kr0lik.treeComponent(this._getTreeContainerElelent(), this.#getTreeOptions());
+
+        this.#updateSelections(treeComponent);
     }
 
     _getTreeInputFieldElelent = () => {
@@ -131,7 +133,7 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
 
     onSelect(node, treeComponent) {
         if (true === this.#isSelectable(node)) {
-            this.#updateSelection(node, treeComponent);
+            this.#updateSelections(treeComponent);
         }
     }
     onActivate(node, treeComponent) {
