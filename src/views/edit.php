@@ -9,6 +9,7 @@ use yii\helpers\Html;
  * @var string            $actionUrl
  * @var string[]|callable $fields
  * @var string[]|callable $links
+ * @var array<string, string> $bsCssClasses
  */
 
 ActiveForm::$autoIdPrefix = 'tree-manager-edit-form-';
@@ -17,7 +18,7 @@ ActiveForm::$autoIdPrefix = 'tree-manager-edit-form-';
 <?php $form = ActiveForm::begin([
     'action' => $actionUrl
 ]); ?>
-    <div class="panel-body">
+    <div class="<?= $bsCssClasses['container-body-class'] ?>">
         <?= $form->field($model, $nameField)->textInput(['class' => 'tree-form-input-name form-control']) ?>
         <?php if ($fields): ?>
             <?php foreach ($fields as $field): ?>
@@ -29,7 +30,7 @@ ActiveForm::$autoIdPrefix = 'tree-manager-edit-form-';
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
-    <div class="panel-footer">
+    <div class="<?= $bsCssClasses['container-footer-class'] ?>">
         <?= Html::submitButton(Yii::t('kr0lik.tree', 'Save'), ['class' => 'btn btn-sm btn-success tree-form-submit']) ?>
         <?= Html::button(Yii::t('kr0lik.tree', 'Cancel'), ['class'=>'btn btn-sm btn-danger tree-form-cancel']) ?>
 

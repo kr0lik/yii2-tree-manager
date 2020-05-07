@@ -2,6 +2,8 @@
 namespace kr0lik\tree;
 
 use kr0lik\tree\assets\TreeInputAsset;
+use kr0lik\tree\traits\BsVersionTrait;
+use kr0lik\tree\traits\PathActionTrait;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\helpers\{ArrayHelper, Html, Json};
@@ -22,10 +24,6 @@ class TreeInput extends InputWidget
      */
     public $viewPath = 'input';
     /**
-     * @var string
-     */
-    public $pathAction;
-    /**
      * @var bool
      */
     public $leavesOnly = true;
@@ -41,12 +39,17 @@ class TreeInput extends InputWidget
      * @var array<string, string>
      */
     public $messages = [];
+    
+    use PathActionTrait, BsVersionTrait;
 
     /**
      * @throws InvalidConfigException
      */
     public function init(): void
     {
+        $this->initPathAction();
+        $this->initBsVersion();
+
         $this->validate();
         $this->prepare();
 
@@ -67,6 +70,7 @@ class TreeInput extends InputWidget
             'options' => $this->treeOptions,
             'inputField' => $inputField,
             'collapse' => $this->collapse,
+            'bsCssClasses' => $this->bsCssClasses,
         ]);
     }
 
@@ -99,10 +103,6 @@ class TreeInput extends InputWidget
      */
     private function validate(): void
     {
-        if (!$this->pathAction) {
-            throw new InvalidConfigException('PathAction of tree options is required.');
-        }
-
         if (!is_bool($this->leavesOnly)) {
             throw new InvalidConfigException('LeavesOnly must be boolean.');
         }
@@ -145,6 +145,8 @@ class TreeInput extends InputWidget
 
     private function registerAssets(): void
     {
+        $this->registerBsAsset();
+
         TreeInputAsset::register($this->getView());
 
         $this->getView()

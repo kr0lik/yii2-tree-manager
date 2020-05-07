@@ -2,6 +2,8 @@
 namespace kr0lik\tree;
 
 use kr0lik\tree\assets\TreeManagerAsset;
+use kr0lik\tree\traits\BsVersionTrait;
+use kr0lik\tree\traits\PathActionTrait;
 use Yii;
 use yii\base\{InvalidConfigException, Widget};
 use yii\helpers\{ArrayHelper, Json};
@@ -20,10 +22,6 @@ class TreeManagerWidget extends Widget
      * @var string
      */
     public $viewPath = 'manager';
-    /**
-     * @var string
-     */
-    public $pathAction;
     /**
      * @var bool
      */
@@ -45,11 +43,16 @@ class TreeManagerWidget extends Widget
      */
     public $messages = [];
 
+    use PathActionTrait, BsVersionTrait;
+
     /**
      * @throws InvalidConfigException
      */
     public function init(): void
     {
+        $this->initPathAction();
+        $this->initBsVersion();
+
         $this->validate();
         $this->prepare();
 
@@ -60,7 +63,10 @@ class TreeManagerWidget extends Widget
     {
         $this->registerAssets();
 
-        return $this->render($this->viewPath, ['options' => $this->treeOptions]);
+        return $this->render($this->viewPath, [
+            'options' => $this->treeOptions,
+            'bsCssClasses' => $this->bsCssClasses,
+        ]);
     }
 
     /**
@@ -68,10 +74,6 @@ class TreeManagerWidget extends Widget
      */
     private function validate(): void
     {
-        if (!$this->pathAction) {
-            throw new InvalidConfigException('PathAction of tree options is required.');
-        }
-
         if ($this->activeId && !(is_string($this->activeId) || is_int($this->activeId))) {
             throw new InvalidConfigException('ActiveId must be int or string.');
         }
@@ -122,6 +124,8 @@ class TreeManagerWidget extends Widget
 
     private function registerAssets(): void
     {
+        $this->registerBsAsset();
+
         TreeManagerAsset::register($this->getView());
 
         $this->getView()

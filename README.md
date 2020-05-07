@@ -46,6 +46,7 @@ Required options:
 * treeModelClass - tree model class.
 
 Optional:
+* bsVersion: int - Bootstrap version. Default 3.
 * formViewPath - Path to form view.
 * formNameField - Field with name of node. Default: `name`.
 * formFields - Array of additional edit fields (ex: body or description). It can be string or callable.
@@ -91,6 +92,7 @@ Required options:
 * pathAction - Url to tree model backend action.
 
 Optional:
+* bsVersion: int - Bootstrap version. Default 3.
 * treeOptions: array - Container tag options.
 * multipleRoots: bool - Allow multiple roots. Default: false.
 * activeId: int - ID active node by default.
@@ -161,6 +163,7 @@ Required options:
 * pathAction - Url to tree model backend action.
 
 Optional:
+* bsVersion: int - Bootstrap version. Default 3.
 * treeOptions: array - Container tag options.
 * leavesOnly: bool - Select only endpoint nodes. Default: true.
 * multiple: bool - Select multiple nodes. Default: false.
@@ -207,4 +210,15 @@ return [
     ],
     // ...
 ];
+```
+
+Global bootstrap version
+------------------------
+You can specify bootstrap version for tree-manager globaly by adding bsVersion option in yii params (e.g. config/params.php):
+```php
+'params' => [
+    'bsVersion' => 4,
+    // other settings
+],
+// ...
 ```
