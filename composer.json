@@ -19,6 +19,10 @@
 		"yiisoft/yii2-jui": "~2.0.0",
 		"bower-asset/fancytree": "^2.35"
 	},
+	"suggest": {
+                "yiisoft/yii2-bootstrap": "to work with Bootstrap 3",
+                "yiisoft/yii2-bootstrap4": "to work with Bootstrap 4"
+        },
 	"autoload": {
 		"psr-4": {
 			"kr0lik\\tree\\": "src/"
