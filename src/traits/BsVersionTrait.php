@@ -27,6 +27,7 @@ trait BsVersionTrait
         'container-footer-class'  => [3 => 'panel-footer',  4 => 'card-footer'],
         'container-primary-class' => [3 => 'panel-primary', 4 => 'bg-primary text-white'],
         'container-info-class'    => [3 => 'panel-info',    4 => 'bg-info text-white'],
+        'container-default-class' => [3 => 'panel-default',    4 => 'bg-light text-white'],
     ];
 
     public function initBsVersion(): void

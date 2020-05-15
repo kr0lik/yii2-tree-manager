@@ -8,6 +8,7 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
 
     static treeBreadcrumbsClass = '.tree-node-breadcrumbs'
     static treeNodeNameClass = '.tree-node-name'
+    static treeformReloadButtonClass = '.tree-form-reload'
 
     #options = {
         pathAction: null,
@@ -134,6 +135,7 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         this.#initAddAction(treeComponent);
         this.#initAppendAction(treeComponent);
         this.#initRemoveAction(treeComponent);
+        this.#initFormReloadAction(treeComponent);
     }
     #initAppendAction = function (treeComponent) {
         let $button = this._getAppendButtonElelent();
@@ -162,6 +164,16 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
             $button.show();
             $button.on("click", () => {
                 this.#deleteNode(treeComponent);
+            });
+        }
+    }
+    #initFormReloadAction = function (treeComponent) {
+        let $button = this._getFormReloadButtonElement();
+
+        if ($button) {
+            $button.on("click", () => {
+                var node = treeComponent.activeNode;
+                this.treeManagerForm.prepareForm(node, treeComponent)
             });
         }
     }
@@ -277,9 +289,13 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
     _getNodeNameElement = () => {
         return this.$containerElement.find(TreeManager.treeNodeNameClass);
     }
+    _getFormReloadButtonElement = () => {
+        return this.$containerElement.find(TreeManager.treeformReloadButtonClass);
+    }
 
     onActivate(node, treeComponent) {
-        this.treeManagerForm.prepareForm(node, treeComponent)
+        this.treeManagerForm.prepareForm(node, treeComponent);
+        this._getFormReloadButtonElement().show();
     }
     onRenderNode(node, treeComponent) {
         if (null === treeComponent.needToActiveId) {
@@ -525,9 +541,7 @@ kr0lik.treeManagerForm = class TreeManagerForm {
 
         this.$containerElement.html(this.loader);
 
-        this.#loadForm(editedNode, treeComponent).done(() => {
-            $(document).trigger('treeFormAfterLoad', [$form, editedNode]);
-        });
+        this.#loadForm(editedNode, treeComponent);
     }
     #loadForm = function (editedNode, treeComponent) {
         return $.get(
@@ -541,6 +555,8 @@ kr0lik.treeManagerForm = class TreeManagerForm {
 
                     this.#prepareNodeData($form, editedNode, treeComponent);
                     this.#bindActions($form, editedNode, treeComponent);
+
+                    $(document).trigger('treeFormAfterLoad', [$form, editedNode]);
                 } else {
                     this.showError(result.message);
                 }

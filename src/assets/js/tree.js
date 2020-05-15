@@ -160,12 +160,12 @@ var kr0lik = {
                 count = filterFunc.call(tree, match, opts);
 
                 self._getTreeSearchResetElement().attr("disabled", false);
-                self._getTreeSearchMatchesElement().text(` ${count}`);
+                self._getTreeSearchMatchesElement().show().text(`${count}`);
             }).focus();
 
             self._getTreeSearchResetElement().click(function (e) {
                 self._getTreeSearchInputElement().val('');
-                self._getTreeSearchMatchesElement().text('');
+                self._getTreeSearchMatchesElement().hide().text('');
                 tree.clearFilter();
             }).attr("disabled", true);
         }

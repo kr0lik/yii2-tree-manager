@@ -28,6 +28,7 @@ $tag = ArrayHelper::remove($options, 'tag', 'div');
             <div class="<?= $bsCssClasses['container-class'] ?>">
                 <div class="<?= $bsCssClasses['container-header-class'] ?> <?= $bsCssClasses['container-primary-class'] ?>">
                     <span class="tree-node-breadcrumbs"></span><span class="tree-node-name"></span>
+                    <?= Html::button('<i class="fa fa-sync"></i>', ['class' => 'btn btn-xs btn-info pull-right float-right tree-form-reload', 'style' => 'display: none']) ?>
                 </div>
                 <div class="tree-manager-form-container">
                     <div class="<?= $bsCssClasses['container-body-class'] ?>">
