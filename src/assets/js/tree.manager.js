@@ -245,10 +245,13 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         });
     }
     #destroyNode = function (node, treeComponent) {
+        this._getFormReloadButtonElement().hide();
+        this._getFormContainerElelent().html('');
+        this._getBreadCrumbsElement().html('');
+        this._getNodeNameElement().html('');
+
         if (node.getLevel() > 1) {
             node.parent.setActive(true);
-        } else {
-            this._getFormContainerElelent().html('');
         }
 
         node.remove();
@@ -397,6 +400,31 @@ kr0lik.treeManagerForm = class TreeManagerForm {
             .find('.fa').remove();
     }
 
+    #loadForm = function (editedNode, treeComponent) {
+        return $.get(
+            this.#options.pathAction,
+            this.#getQuery(editedNode),
+            result => {
+                if (true === result.success) {
+                    this.$containerElement.html(result.data.form);
+
+                    var $form = this.$containerElement.find('form');
+
+                    this.#prepareNodeData($form, editedNode, treeComponent);
+                    this.#bindActions($form, editedNode, treeComponent);
+
+                    this.#options.context._getFormReloadButtonElement().show();
+
+                    $(document).trigger('treeFormAfterLoad', [$form, editedNode]);
+                } else {
+                    this.showError(result.message);
+                }
+            },
+            "json"
+        ).fail(response => {
+            this.showError(response.statusText);
+        });
+    }
     #bindActions = function ($form, editedNode, treeComponent) {
         this.#bindInput($form, editedNode, treeComponent);
         this.#bindSubmit($form, editedNode, treeComponent);
@@ -543,29 +571,7 @@ kr0lik.treeManagerForm = class TreeManagerForm {
 
         this.#loadForm(editedNode, treeComponent);
     }
-    #loadForm = function (editedNode, treeComponent) {
-        return $.get(
-            this.#options.pathAction,
-            this.#getQuery(editedNode),
-            result => {
-                if (true === result.success) {
-                    this.$containerElement.html(result.data.form);
 
-                    var $form = this.$containerElement.find('form');
-
-                    this.#prepareNodeData($form, editedNode, treeComponent);
-                    this.#bindActions($form, editedNode, treeComponent);
-
-                    $(document).trigger('treeFormAfterLoad', [$form, editedNode]);
-                } else {
-                    this.showError(result.message);
-                }
-            },
-            "json"
-        ).fail(response => {
-            this.showError(response.statusText);
-        });
-    }
     showError(message) {
         this.$containerElement.html(`<p class="error form-error text-danger">${message}</p>`);
     }
