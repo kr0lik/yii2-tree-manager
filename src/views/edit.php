@@ -21,6 +21,7 @@ ActiveForm::$autoIdPrefix = 'tree-manager-edit-form-';
     <div class="<?= $bsCssClasses['container-body-class'] ?>">
         <?= $form->field($model, $nameField)->textInput(['class' => 'tree-form-input-name form-control']) ?>
         <?php if ($fields): ?>
+
             <?php foreach ($fields as $field): ?>
                 <?php if (is_callable($field)): ?>
                     <?= $field($form, $model); ?>
@@ -28,6 +29,7 @@ ActiveForm::$autoIdPrefix = 'tree-manager-edit-form-';
                     <?= $form->field($model, $field)->textInput(); ?>
                 <?php endif; ?>
             <?php endforeach; ?>
+
         <?php endif; ?>
     </div>
     <div class="<?= $bsCssClasses['container-footer-class'] ?>">

@@ -99,6 +99,7 @@ Optional:
 * dndEnable: bool - for dissable drag and drop set null or false. Default: true.
 * viewPath - path to view of manager.
 * firstRootActivateDefault - Activate first root on load if no activeId. Default: true.
+* buttons - Array of additional buttons(as Html).
 
 ```php
 <?php

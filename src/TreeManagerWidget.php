@@ -42,6 +42,10 @@ class TreeManagerWidget extends Widget
      * @var array<string, string>
      */
     public $messages = [];
+    /**
+     * @var string[]
+     */
+    public $buttons = [];
 
     use PathActionTrait, BsVersionTrait;
 
@@ -65,7 +69,8 @@ class TreeManagerWidget extends Widget
 
         return $this->render($this->viewPath, [
             'options' => $this->treeOptions,
-            'bsCssClasses' => $this->bsCssClasses,
+            'buttons' => $this->buttons,
+            'bsCssClasses' => $this->bsCssClasses, // From BsVersionTrait
         ]);
     }
 
@@ -88,6 +93,10 @@ class TreeManagerWidget extends Widget
 
         if (!is_bool($this->firstRootActivateDefault)) {
             throw new InvalidConfigException('FirstRootActivateDefault must be boolean.');
+        }
+
+        if (!is_array($this->buttons)) {
+            throw new InvalidConfigException('Buttons must be array of string.');
         }
     }
 
@@ -130,7 +139,7 @@ class TreeManagerWidget extends Widget
 
         $this->getView()
             ->registerJs(
-                sprintf('new kr0lik.treeManager("%s", %s);', $this->treeOptions['id'], Json::encode($this->treeConfig))
+                sprintf('new kr0lik.treeManager.create("%s", %s);', $this->treeOptions['id'], Json::encode($this->treeConfig))
             );
     }
 }

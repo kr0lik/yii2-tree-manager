@@ -17,9 +17,9 @@ trait BsVersionTrait
     /**
      * @var array<string, string>
      */
-    private $bsCssClasses = [];
+    protected $bsCssClasses = [];
 
-    public static $bsCssMap = [
+    protected static $bsCssMap = [
         'container-class'         => [3 => 'panel',         4 => 'card'],
         'container-header-class'  => [3 => 'panel-heading', 4 => 'card-header'],
         'container-title-class'   => [3 => 'panel-title',   4 => 'card-title'],
@@ -27,7 +27,8 @@ trait BsVersionTrait
         'container-footer-class'  => [3 => 'panel-footer',  4 => 'card-footer'],
         'container-primary-class' => [3 => 'panel-primary', 4 => 'bg-primary text-white'],
         'container-info-class'    => [3 => 'panel-info',    4 => 'bg-info text-white'],
-        'container-default-class' => [3 => 'panel-default',    4 => 'bg-light text-white'],
+        'container-default-class' => [3 => 'panel-default', 4 => 'bg-light text-white'],
+        'btn-default-class'       => [3 => 'btn-default',   4 => 'btn-light'],
     ];
 
     public function initBsVersion(): void

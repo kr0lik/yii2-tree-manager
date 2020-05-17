@@ -70,7 +70,7 @@ class TreeInput extends InputWidget
             'options' => $this->treeOptions,
             'inputField' => $inputField,
             'collapse' => $this->collapse,
-            'bsCssClasses' => $this->bsCssClasses,
+            'bsCssClasses' => $this->bsCssClasses, // From BsVersionTrait
         ]);
     }
 
@@ -151,7 +151,7 @@ class TreeInput extends InputWidget
 
         $this->getView()
             ->registerJs(
-                sprintf('new kr0lik.treeInput("%s", %s);', $this->treeOptions['id'], Json::encode($this->treeConfig))
+                sprintf('new kr0lik.treeInput.create("%s", %s);', $this->treeOptions['id'], Json::encode($this->treeConfig))
             );
     }
 

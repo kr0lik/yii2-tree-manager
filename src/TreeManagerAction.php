@@ -92,7 +92,7 @@ class TreeManagerAction extends TreeAction
                     $this->formNameField,
                     $this->formFields,
                     $this->formLinks,
-                    $this->bsCssClasses,
+                    $this->bsCssClasses, // From BsVersionTrait
                 );
             case TreeActionEnum::VALIDATE:
                 return $this->getController()->validateAction();

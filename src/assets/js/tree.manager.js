@@ -36,79 +36,6 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         },
         extensions: ['dnd5'],
     }
-
-    #getTreeOptions = function () {
-        let options = {
-            pathAction: this.#options.pathAction,
-            activeId: this.#options.activeId,
-            dnd5: this.#options.dnd5,
-            extensions: this.#options.extensions,
-            plugins: [this],
-            messages: this.#options.messages,
-        };
-
-        if (options.dnd5) {
-            options.dnd5.dragStart = (node, data) => {
-                data.effectAllowed = "all";
-                data.dropEffect = data.dropEffectSuggested;
-
-                return true;
-            };
-            options.dnd5.dragEnter = (node, data) => {
-                if (node.getLevel() <= 1 && false === this.#options.multipleRoots) return false;  // Do not drag to root
-                if (!data.otherNode.data.id) return false; // Do not drag new nodes
-
-                return true;
-            };
-            options.dnd5.dragDrop = (hitNode, data) => {
-                var targetNode = data.otherNode;
-
-                $.get(
-                    this.#options.pathAction,
-                    {action: "move", mode: data.hitMode, targetId: targetNode.data.id, hitId: hitNode.data.id},
-                    "json"
-                ).done(result => {
-                    if (true === result.success) {
-                        let startNode = targetNode.parent; // Not move this variable!
-
-                        targetNode.moveTo(hitNode, data.hitMode);
-                        if (false === hitNode.expanded && "over" === data.hitMode) {
-                            hitNode.setExpanded(true);
-                        }
-
-                        let nodesToUpdate = this.getParentNodes(startNode).reverse();
-                        nodesToUpdate.push(startNode);
-
-                        nodesToUpdate = nodesToUpdate.concat(
-                            this.getParentNodes(hitNode).reverse().filter((parentNode) => {
-                                $.each(nodesToUpdate, (index, nodeToUpdate) => {
-                                    if (parentNode.data.id === nodeToUpdate.data.id) {
-                                        return true;
-                                    }
-                                });
-                                return false;
-                            }, nodesToUpdate)
-                        );
-                        nodesToUpdate.push(hitNode);
-
-                        $.each(nodesToUpdate, (index, nodeToUpdate) => {
-                            this.updateNode(nodeToUpdate, false);
-                        });
-
-                        this._updateBreadCrumbsPlaces(targetNode);
-
-                        $(document).trigger('treeElementAfterMove', [targetNode, hitNode]);
-                    } else if (result.message) {
-                        this.showError(result.message);
-                    }
-                }).fail(response => {
-                    this.showError(response.statusText);
-                });
-            };
-        }
-
-        return options;
-    }
     #getFormOptions = function () {
         return {
             pathAction: this.#options.pathAction,
@@ -127,18 +54,8 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
             throw Error('PathAction option required!');
         }
     }
-    #init = function () {
-        this.treeManagerForm = new kr0lik.treeManagerForm(this._getFormContainerElelent(), this.#getFormOptions());
-
-        var treeComponent = new kr0lik.treeComponent(this._getTreeContainerElelent(), this.#getTreeOptions());
-
-        this.#initAddAction(treeComponent);
-        this.#initAppendAction(treeComponent);
-        this.#initRemoveAction(treeComponent);
-        this.#initFormReloadAction(treeComponent);
-    }
     #initAppendAction = function (treeComponent) {
-        let $button = this._getAppendButtonElelent();
+        let $button = this.getAppendButtonElelent();
 
         if ($button) {
             $button.show();
@@ -148,7 +65,7 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         }
     }
     #initAddAction = function (treeComponent) {
-        let $button = this._getAddButtonElelent();
+        let $button = this.getAddButtonElelent();
 
         if ($button) {
             $button.show();
@@ -158,7 +75,7 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         }
     }
     #initRemoveAction = function (treeComponent) {
-        let $button = this._getRemoveButtonElelent();
+        let $button = this.getRemoveButtonElelent();
 
         if ($button) {
             $button.show();
@@ -168,7 +85,7 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         }
     }
     #initFormReloadAction = function (treeComponent) {
-        let $button = this._getFormReloadButtonElement();
+        let $button = this.getFormReloadButtonElement();
 
         if ($button) {
             $button.on("click", () => {
@@ -245,10 +162,10 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         });
     }
     #destroyNode = function (node, treeComponent) {
-        this._getFormReloadButtonElement().hide();
-        this._getFormContainerElelent().html('');
-        this._getBreadCrumbsElement().html('');
-        this._getNodeNameElement().html('');
+        this.getFormReloadButtonElement().hide();
+        this.getFormContainerElelent().html('');
+        this.getBreadCrumbsElement().html('');
+        this.getNodeNameElement().html('');
 
         if (node.getLevel() > 1) {
             node.parent.setActive(true);
@@ -259,46 +176,135 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         $(document).trigger('treeElementAfterRemove', [node]);
     }
 
+    getTreeOptions() {
+        let options = {
+            pathAction: this.#options.pathAction,
+            activeId: this.#options.activeId,
+            dnd5: this.#options.dnd5,
+            extensions: this.#options.extensions,
+            plugins: [this],
+            messages: this.#options.messages,
+        };
+
+        if (options.dnd5) {
+            options.dnd5.dragStart = (node, data) => {
+                data.effectAllowed = "all";
+                data.dropEffect = data.dropEffectSuggested;
+
+                return true;
+            };
+            options.dnd5.dragEnter = (node, data) => {
+                if (node.getLevel() <= 1 && false === this.#options.multipleRoots) return false;  // Do not drag to root
+                if (!data.otherNode.data.id) return false; // Do not drag new nodes
+
+                return true;
+            };
+            options.dnd5.dragDrop = (hitNode, data) => {
+                var targetNode = data.otherNode;
+
+                $.get(
+                    this.#options.pathAction,
+                    {action: "move", mode: data.hitMode, targetId: targetNode.data.id, hitId: hitNode.data.id},
+                    "json"
+                ).done(result => {
+                    if (true === result.success) {
+                        let startNode = targetNode.parent; // Not move this variable!
+
+                        targetNode.moveTo(hitNode, data.hitMode);
+                        if (false === hitNode.expanded && "over" === data.hitMode) {
+                            hitNode.setExpanded(true);
+                        }
+
+                        let nodesToUpdate = this.getParentNodes(startNode).reverse();
+                        nodesToUpdate.push(startNode);
+
+                        nodesToUpdate = nodesToUpdate.concat(
+                            this.getParentNodes(hitNode).reverse().filter((parentNode) => {
+                                $.each(nodesToUpdate, (index, nodeToUpdate) => {
+                                    if (parentNode.data.id === nodeToUpdate.data.id) {
+                                        return true;
+                                    }
+                                });
+                                return false;
+                            }, nodesToUpdate)
+                        );
+                        nodesToUpdate.push(hitNode);
+
+                        $.each(nodesToUpdate, (index, nodeToUpdate) => {
+                            this.updateNode(nodeToUpdate, false);
+                        });
+
+                        this._updateBreadCrumbsPlaces(targetNode);
+
+                        $(document).trigger('treeElementAfterMove', [targetNode, hitNode]);
+                    } else if (result.message) {
+                        this.showError(result.message);
+                    }
+                }).fail(response => {
+                    this.showError(response.statusText);
+                });
+            };
+        }
+
+        return options;
+    }
+
     constructor(containerId, options) {
         super();
 
         this.$containerElement = $(`#${containerId}`);
         this.#setOptions(options);
         this.#validate();
-        this.#init();
+    }
+    run(treeComponent) {
+        this.treeManagerForm = new kr0lik.treeManagerForm(this.getFormContainerElelent(), this.#getFormOptions());
+
+        this.#initAddAction(treeComponent);
+        this.#initAppendAction(treeComponent);
+        this.#initRemoveAction(treeComponent);
+        this.#initFormReloadAction(treeComponent);
     }
 
-    _getTreeContainerElelent = () => {
+    static create = function (containerId, options) {
+        var instance = new TreeManager(containerId, options);
+        var tree = new kr0lik.treeComponent(instance.getTreeContainerElelent(), instance.getTreeOptions());
+
+        instance.run(tree);
+
+        return instance;
+    }
+
+    getTreeContainerElelent() {
         return this.$containerElement.find(TreeManager.treeContainerClass);
     }
 
-    _getAddButtonElelent = () => {
+    getAddButtonElelent() {
         return this.$containerElement.find(TreeManager.treeAddButtonClass);
     }
-    _getAppendButtonElelent = () => {
+    getAppendButtonElelent() {
         return this.$containerElement.find(TreeManager.treeAppendButtonClass);
     }
-    _getRemoveButtonElelent = () => {
+    getRemoveButtonElelent() {
         return this.$containerElement.find(TreeManager.treeRemoveButtonClass);
     }
 
-    _getFormContainerElelent = () => {
+    getFormContainerElelent() {
         return this.$containerElement.find(TreeManager.treeManagerFormContainerClass);
     }
 
-    _getBreadCrumbsElement = () => {
+    getBreadCrumbsElement() {
         return this.$containerElement.find(TreeManager.treeBreadcrumbsClass);
     }
-    _getNodeNameElement = () => {
+    getNodeNameElement() {
         return this.$containerElement.find(TreeManager.treeNodeNameClass);
     }
-    _getFormReloadButtonElement = () => {
+    getFormReloadButtonElement() {
         return this.$containerElement.find(TreeManager.treeformReloadButtonClass);
     }
 
     onActivate(node, treeComponent) {
         this.treeManagerForm.prepareForm(node, treeComponent);
-        this._getFormReloadButtonElement().show();
+        this.getFormReloadButtonElement().show();
     }
     onRenderNode(node, treeComponent) {
         if (null === treeComponent.needToActiveId) {
@@ -311,7 +317,7 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
                     node.setActive(true);
                 }
             } else {
-                this._getFormContainerElelent().html(`<div class="panel-body">${this.#options.messages.notSelected}</div>`);
+                this.getFormContainerElelent().html(`<div class="panel-body">${this.#options.messages.notSelected}</div>`);
             }
         }
     }
@@ -343,10 +349,10 @@ kr0lik.treeManagerForm = class TreeManagerForm {
     }
     #updateNodeBreadCrumbsElement = function (node, treeComponent) {
         let crumbs = treeComponent.getBreadCrumbs(node);
-        this.#options.context._getBreadCrumbsElement().html(crumbs);
+        this.#options.context.getBreadCrumbsElement().html(crumbs);
     }
     #updateNodeNameElement = function (name) {
-        this.#options.context._getNodeNameElement().html(name.bold());
+        this.#options.context.getNodeNameElement().html(name.bold());
     }
     #getQuery = function (node) {
         let query = {
@@ -381,7 +387,7 @@ kr0lik.treeManagerForm = class TreeManagerForm {
         return query;
     }
     #prepareNodeData = function ($form, editedNode, treeComponent) {
-        let nodeName = this._getFormInputNameElement().val();
+        let nodeName = this.getFormInputNameElement().val();
 
         if (!nodeName && editedNode.data.new) {
             nodeName = this.#options.messages.new;
@@ -392,9 +398,9 @@ kr0lik.treeManagerForm = class TreeManagerForm {
         this.#updateNodeBreadCrumbsElement(editedNode, treeComponent);
         this.#updateNodeNameElement(editedNode.title);
 
-        this._getFormErrorMessageElement().hide();
+        this.getFormErrorMessageElement().hide();
 
-        this._getFormSubmitButtonElement()
+        this.getFormSubmitButtonElement()
             .removeClass('btn-danger')
             .addClass('btn-success')
             .find('.fa').remove();
@@ -413,7 +419,7 @@ kr0lik.treeManagerForm = class TreeManagerForm {
                     this.#prepareNodeData($form, editedNode, treeComponent);
                     this.#bindActions($form, editedNode, treeComponent);
 
-                    this.#options.context._getFormReloadButtonElement().show();
+                    this.#options.context.getFormReloadButtonElement().show();
 
                     $(document).trigger('treeFormAfterLoad', [$form, editedNode]);
                 } else {
@@ -433,7 +439,7 @@ kr0lik.treeManagerForm = class TreeManagerForm {
     #bindInput = function ($form, node, treeComponent) {
         var self = this;
 
-        let $button = this._getFormInputNameElement();
+        let $button = this.getFormInputNameElement();
         $button.bind("keyup", function() {
             let name = $(this).val();
 
@@ -443,8 +449,8 @@ kr0lik.treeManagerForm = class TreeManagerForm {
         });
     }
     #bindSubmit = function ($form, editedNode, treeComponent) {
-        var $submitButton = this._getFormSubmitButtonElement(),
-            $errorMessageElement = this._getFormErrorMessageElement(),
+        var $submitButton = this.getFormSubmitButtonElement(),
+            $errorMessageElement = this.getFormErrorMessageElement(),
             defaultSubmitText = $submitButton.text();
 
         $form.on('beforeSubmit', (event, jqXHR, settings) => {
@@ -500,7 +506,7 @@ kr0lik.treeManagerForm = class TreeManagerForm {
                     $(document).trigger('treeFormAfterSubmit', [$form, editedNode]);
 
                     this.#loadForm(editedNode, treeComponent).done(() => {
-                        let $submitButton = this._getFormSubmitButtonElement(),
+                        let $submitButton = this.getFormSubmitButtonElement(),
                             defaultSubmitText = $submitButton.text();;
 
                         $submitButton
@@ -533,7 +539,7 @@ kr0lik.treeManagerForm = class TreeManagerForm {
         $form.bind("submit", () => { return false; });
     }
     #bindReset = function ($form, editedNode, treeComponent) {
-        let $button = this._getFormCancelButtonElement();
+        let $button = this.getFormCancelButtonElement();
 
         $button.bind("click", function () {
             $form.trigger('reset.yiiActiveForm');
@@ -544,22 +550,21 @@ kr0lik.treeManagerForm = class TreeManagerForm {
         }.bind(this));
     }
 
-    _getFormInputNameElement = () => {
+    getFormInputNameElement() {
         return this.$containerElement.find(TreeManagerForm.formInputNameClass);
     }
-    _getFormSubmitButtonElement = () => {
+    getFormSubmitButtonElement() {
         return this.$containerElement.find(TreeManagerForm.formSubmitButtonClass);
     }
-    _getFormCancelButtonElement = () => {
+    getFormCancelButtonElement() {
         return this.$containerElement.find(TreeManagerForm.formCancelButtonClass);
     }
-    _getFormErrorMessageElement = () => {
+    getFormErrorMessageElement() {
         return this.$containerElement.find(TreeManagerForm.formErrorMessageClass);
     }
 
     constructor($containerElement, options) {
         this.$containerElement = $containerElement;
-
         this.#setOptions(options);
     }
 

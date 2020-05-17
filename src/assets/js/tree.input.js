@@ -18,26 +18,6 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
             noData: "No data."
         },
     }
-    #getTreeOptions = function() {
-        return  {
-            pathAction: this.#options.pathAction,
-            selectId: this.#options.selectId,
-            plugins: [this],
-            selectMode: this.#options.multiple ? 2 : 1,
-            checkbox: ($event, $data) => {
-                let $node = $data.node,
-                    $type = this.#options.multiple ? 'checkbox' : 'radio';
-
-                if (false === this.#isSelectable($node)) {
-                    return false;
-                }
-
-                return $type;
-            },
-            plugins: [this],
-            messages: this.#options.messages,
-        };
-    }
     #setOptions = function(options) {
         this.#options = Object.assign(this.#options, options);
     }
@@ -62,12 +42,12 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
                     }
                 }
 
-                this._getTreeInputFieldElelent().html(selectOptions);
+                this.getTreeInputFieldElelent().html(selectOptions);
             } else {
                 selectIds = Object.keys(selections);
                 selectIds = selectIds.filter(Boolean);
 
-                this._getTreeInputFieldElelent().val(selectIds.join(','));
+                this.getTreeInputFieldElelent().val(selectIds.join(','));
             }
 
             let selectTitles = Object.values(selections);
@@ -77,7 +57,7 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
                 selectTitles.push(this.loader);
             }
 
-            this._getTreeInputListElelent().html(selectTitles.join('<br />'));
+            this.getTreeInputListElelent().html(selectTitles.join('<br />'));
         } else {
             this.#clearInput();
         }
@@ -101,33 +81,60 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
         return selections;
     }
     #clearInput = function() {
-        this._getTreeInputListElelent().text(this.#options.messages.select);
+        this.getTreeInputListElelent().text(this.#options.messages.select);
 
         if (true === this.#options.multiple) {
-            this._getTreeInputFieldElelent().html('');
+            this.getTreeInputFieldElelent().html('');
         } else {
-            this._getTreeInputFieldElelent().val('');
+            this.getTreeInputFieldElelent().val('');
         }
+    }
+
+    getTreeOptions() {
+        return  {
+            pathAction: this.#options.pathAction,
+            selectId: this.#options.selectId,
+            selectMode: this.#options.multiple ? 2 : 1,
+            checkbox: ($event, $data) => {
+                let $node = $data.node,
+                    $type = this.#options.multiple ? 'checkbox' : 'radio';
+
+                if (false === this.#isSelectable($node)) {
+                    return false;
+                }
+
+                return $type;
+            },
+            messages: this.#options.messages,
+            plugins: [this],
+        };
     }
 
     constructor(containerId, options) {
         super();
-
         this.$containerElement = $(`#${containerId}`);
         this.#setOptions(options);
-
-        var treeComponent = new kr0lik.treeComponent(this._getTreeContainerElelent(), this.#getTreeOptions());
-
+    }
+    run(treeComponent) {
         this.#updateSelections(treeComponent);
     }
 
-    _getTreeInputFieldElelent = () => {
+    static create = function (containerId, options) {
+        var instance = new TreeInput(containerId, options);
+        var tree = new kr0lik.treeComponent(instance.getTreeContainerElelent(), instance.getTreeOptions());
+
+        instance.run(tree);
+
+        return instance;
+    }
+
+    getTreeInputFieldElelent() {
         return this.$containerElement.find(TreeInput.treeInputFieldClass);
     }
-    _getTreeInputListElelent = () => {
+    getTreeInputListElelent() {
         return this.$containerElement.find(TreeInput.treeInputListClass);
     }
-    _getTreeContainerElelent = () => {
+    getTreeContainerElelent() {
         return  this.$containerElement.find(TreeInput.treeContainerClass);
     }
 

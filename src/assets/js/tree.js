@@ -58,7 +58,7 @@ var kr0lik = {
             this.#initSearch();
         }
         #initTree = function () {
-            this._getTreeElement().fancytree(this.#getTreeOptions());
+            this.getTreeElement().fancytree(this.#getTreeOptions());
         }
         #getTreeOptions = function () {
             return {
@@ -124,6 +124,21 @@ var kr0lik = {
 
                     this.#activate(node);
                 },
+                focus: (event, data) => {
+                    var node = data.node;
+
+                    this.#focus(node);
+                },
+                expand: (event, data) => {
+                    var node = data.node;
+
+                    this.#expand(node);
+                },
+                collapse: (event, data) => {
+                    var node = data.node;
+
+                    this.#collapse(node);
+                },
             };
         }
         #initSelections = function () {
@@ -146,26 +161,26 @@ var kr0lik = {
             var self = this,
                 tree = this.tree;
 
-            self._getTreeSearchInputElement().on("keyup", function (e) {
+            self.getTreeSearchInputElement().on("keyup", function (e) {
                 let count,
                     opts = self.#options.filter,
                     filterFunc = opts.leavesOnly ? tree.filterBranches : tree.filterNodes,
                     match = $(this).val();
 
                 if (e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === "") {
-                    self._getTreeSearchResetElement().click();
+                    self.getTreeSearchResetElement().click();
                     return;
                 }
 
                 count = filterFunc.call(tree, match, opts);
 
-                self._getTreeSearchResetElement().attr("disabled", false);
-                self._getTreeSearchMatchesElement().show().text(`${count}`);
+                self.getTreeSearchResetElement().attr("disabled", false);
+                self.getTreeSearchMatchesElement().show().text(`${count}`);
             }).focus();
 
-            self._getTreeSearchResetElement().click(function (e) {
-                self._getTreeSearchInputElement().val('');
-                self._getTreeSearchMatchesElement().hide().text('');
+            self.getTreeSearchResetElement().click(function (e) {
+                self.getTreeSearchInputElement().val('');
+                self.getTreeSearchMatchesElement().hide().text('');
                 tree.clearFilter();
             }).attr("disabled", true);
         }
@@ -204,7 +219,7 @@ var kr0lik = {
             }
 
             if(node.isFolder()) {
-                return 'fa fa-tags';
+                return 'fa fa-folder';
             }
 
             return false;
@@ -226,6 +241,15 @@ var kr0lik = {
 
             this.#options.plugins.forEach(plugin => plugin.onActivate(node, this));
         }
+        #focus = function (node) {
+            this.#options.plugins.forEach(plugin => plugin.onFocus(node, this));
+        }
+        #expand = function (node) {
+            this.#options.plugins.forEach(plugin => plugin.onExpand(node, this));
+        }
+        #collapse = function (node) {
+            this.#options.plugins.forEach(plugin => plugin.onCollapse(node, this));
+        }
 
         constructor($containerElement, options) {
             this.$containerElement = $containerElement;
@@ -235,16 +259,16 @@ var kr0lik = {
             this.#init();
         }
 
-        _getTreeElement = () => {
+        getTreeElement() {
             return this.$containerElement.find(TreeComponent.treeClass);
         }
-        _getTreeSearchInputElement = () => {
+        getTreeSearchInputElement() {
             return this.$containerElement.find(TreeComponent.treeSearchInputClass);
         }
-        _getTreeSearchResetElement = () => {
+        getTreeSearchResetElement() {
             return this.$containerElement.find(TreeComponent.treeSearchResetClass);
         }
-        _getTreeSearchMatchesElement = () => {
+        getTreeSearchMatchesElement() {
             return this.$containerElement.find(TreeComponent.treeSearchMatchesClass);
         }
 
@@ -362,7 +386,7 @@ var kr0lik = {
         }
 
         get tree() {
-            return $.ui.fancytree.getTree(this._getTreeElement());
+            return $.ui.fancytree.getTree(this.getTreeElement());
         }
         get rootNode() {
             return this.tree.getRootNode();
@@ -384,7 +408,10 @@ var kr0lik = {
     treePlugin: class TreePlugin {
         onSelect(node, treeComponent) {}
         onActivate(node, treeComponent) {}
+        onFocus(node, treeComponent) {}
         onRenderNode(node, treeComponent) {}
+        onExpand(node, treeComponent) {}
+        onCollapse(node, treeComponent) {}
 
         getOptions() {
             return [];
