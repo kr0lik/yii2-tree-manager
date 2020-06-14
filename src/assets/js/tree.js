@@ -193,7 +193,7 @@ var kr0lik = {
             if (node.titleWithHighlight && node.match) {
                 $(node.span).find('span.fancytree-title').html(node.titleWithHighlight);
             }
-
+            
             this.#options.plugins.forEach(plugin => plugin.onRenderNode(node, this));
         }
         #getTitle = function (node) {

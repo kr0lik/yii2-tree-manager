@@ -27,27 +27,36 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
         }
     }
     #isSelectable = function(node) {
-        return !(this.#options.leavesOnly && node.isFolder());
+        if (!this.#options.leavesOnly) return true;
+        if (!node.isFolder()) return true;
+        if (false !== this.#options.selectId.indexOf(node.data.id)) return true;
+        return false;
     }
     #updateSelections = function(treeComponent) {
-        let selections = this.#getSelections(treeComponent);
+        let selections = this.#getSelections(treeComponent),
+            selectIds = [];
 
         if (Object.keys(selections).length > 0) {
             if (this.#options.multiple) {
                 let selectOptions = '';
-                for(let selectId in selections) {
+                for (let selectId in selections) {
                     if(true === selections.hasOwnProperty(selectId)) {
                         let title = selections[selectId] ?? selectId;
                         selectOptions += `<option value="${selectId}" selected="selected">${title}</option>`;
                     }
                 }
 
-                this.getTreeInputFieldElelent().html(selectOptions);
+                let selectIds = Object.keys(selections);
+                if (this.getTreeInputFieldElelent().val() !== selectIds.join(',')) {
+                    this.getTreeInputFieldElelent().html(selectOptions).change();
+                }
             } else {
                 selectIds = Object.keys(selections);
                 selectIds = selectIds.filter(Boolean);
 
-                this.getTreeInputFieldElelent().val(selectIds.join(','));
+                if (this.getTreeInputFieldElelent().val() !== selectIds.join(',')) {
+                    this.getTreeInputFieldElelent().val(selectIds.join(',')).change();
+                }
             }
 
             let selectTitles = Object.values(selections);
@@ -83,10 +92,14 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
     #clearInput = function() {
         this.getTreeInputListElelent().text(this.#options.messages.select);
 
+        if (!this.getTreeInputFieldElelent().val()) {
+            return;
+        }
+
         if (true === this.#options.multiple) {
-            this.getTreeInputFieldElelent().html('');
+            this.getTreeInputFieldElelent().html('').change();
         } else {
-            this.getTreeInputFieldElelent().val('');
+            this.getTreeInputFieldElelent().val('').change();
         }
     }
 

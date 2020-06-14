@@ -309,12 +309,20 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
     onRenderNode(node, treeComponent) {
         if (null === treeComponent.needToActiveId) {
             if (true === this.#options.firstRootActivateDefault) {
+                if (treeComponent.activeNode) {
+                    return;
+                }
+
                 let rootNode = treeComponent.rootNode;
                 // Activate root by default
-                let firstRootNode = treeComponent.rootNode.getFirstChild();
-
-                if (node.data.id && firstRootNode.data.id === node.data.id) {
-                    node.setActive(true);
+                let childrens = treeComponent.rootNode.children;
+                if (childrens && childrens.length > 0) {
+                    childrens.forEach(childrenNode => {
+                        if (node.data.id && childrenNode.data.id === node.data.id) {
+                            node.setActive(true);
+                            return;
+                        }
+                    });
                 }
             } else {
                 this.getFormContainerElelent().html(`<div class="panel-body">${this.#options.messages.notSelected}</div>`);
