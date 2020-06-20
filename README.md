@@ -17,12 +17,6 @@ Either run
 composer require --prefer-dist kr0lik/yii2-tree-manager
 ```
 
-or add
-
-```
-"kr0lik/yii2-tree-manager": "*"
-```
-
 to the require section of your `composer.json` file.
 
 # Description
@@ -189,6 +183,70 @@ $(document).on('treeInputChange', function ($event, $selectedNodes) {
 
 });
 ```
+
+Tree Relations Input
+-----------
+Add `kr0lik\tree\TreeRelationAction` into controller.
+
+Required options:
+* treeModelClass - tree model class.
+* relationModelClass - tree relaion model class.
+
+Example: 
+```php
+<?php
+use yii\web\Controller;
+use kr0lik\tree\TreeRelationAction;
+use app\path\to\YourTreeActiveRecord;
+use app\path\to\YourRelationActiveRecord;
+
+class YourController extends Controller
+{
+    public function actions()
+    {
+        return [
+            'tree' => [
+                'class' => TreeRelationAction::class,
+                'treeModelClass' => YourTreeActiveRecord::class,
+                'relationModelClass' => YourRelationActiveRecord::class,
+            ]
+        ];
+    }
+}
+```
+
+Add `kr0lik\tree\TreeRelationInput` into view.
+
+Required options:
+* pathAction - Url to tree model backend action.
+
+Optional:
+* bsVersion: int - Bootstrap version. Default 3.
+* treeOptions: array - Container tag options.
+* leavesOnly: bool - Select only endpoint nodes. Default: true.
+* multiple: bool - Select multiple nodes. Default: false.
+* options: array - input options.
+* viewPath: string - path to view of input.
+* collapse: bool - collapse tree. Default: true.
+
+Example:
+```php
+<?php
+use kr0lik\tree\TreeInput;
+?>
+
+<?= $form->field($model, 'field')->widget(TreeRelationInput::class, [
+    'pathAction' => 'url/to/YourController/tree/action',
+]) ?>
+```
+
+Events:
+```js
+$(document).on('treeInputChange', function ($event, $selectedNodes) {
+
+});
+```
+
 
 Internationalization
 ----------------------

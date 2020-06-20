@@ -1,11 +1,12 @@
 <?php
 namespace kr0lik\tree;
 
+use kr0lik\tree\controllers\TreeController;
 use kr0lik\tree\controllers\TreeManagerController;
-use kr0lik\tree\enum\TreeActionEnum;
-use kr0lik\tree\traits\BsVersionTrait;
-use kr0lik\tree\exception\{TreeActionException, TreeModeException, TreeNotFoundException};
+use kr0lik\tree\enum\TreeManagerActionEnum;
+use kr0lik\tree\exception\{TreeActionException, TreeManagerModeException, TreeNotFoundException};
 use kr0lik\tree\response\TreeResponse;
+use kr0lik\tree\traits\BsVersionTrait;
 use yii\base\InvalidConfigException;
 
 class TreeManagerAction extends TreeAction
@@ -80,13 +81,13 @@ class TreeManagerAction extends TreeAction
 
     /**
      * @throws TreeActionException
-     * @throws TreeModeException
+     * @throws TreeManagerModeException
      * @throws TreeNotFoundException
      */
     protected function runAction(string $action): TreeResponse
     {
         switch ($action) {
-            case TreeActionEnum::GET_FORM:
+            case TreeManagerActionEnum::GET_FORM:
                 return $this->getController()->getFormAction(
                     $this->formViewPath,
                     $this->formNameField,
@@ -94,15 +95,15 @@ class TreeManagerAction extends TreeAction
                     $this->formLinks,
                     $this->bsCssClasses, // From BsVersionTrait
                 );
-            case TreeActionEnum::VALIDATE:
+            case TreeManagerActionEnum::VALIDATE:
                 return $this->getController()->validateAction();
-            case TreeActionEnum::CREATE:
+            case TreeManagerActionEnum::CREATE:
                 return $this->getController()->createAction();
-            case TreeActionEnum::UPDATE:
+            case TreeManagerActionEnum::UPDATE:
                 return $this->getController()->updateAction();
-            case TreeActionEnum::DELETE:
+            case TreeManagerActionEnum::DELETE:
                 return $this->getController()->deleteAction();
-            case TreeActionEnum::MOVE:
+            case TreeManagerActionEnum::MOVE:
                 return $this->getController()->moveAction();
             default:
                 return parent::runAction($action);
@@ -110,9 +111,9 @@ class TreeManagerAction extends TreeAction
     }
 
     /**
-     * @throws TreeModeException
+     * @throws TreeManagerModeException
      */
-    private function getController(): TreeManagerController
+    protected function getController(): TreeController
     {
         $repository = $this->getRepository();
         

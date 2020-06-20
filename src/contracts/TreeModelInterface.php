@@ -28,10 +28,10 @@ interface TreeModelInterface
     public static function findTreeModelById($id): ?TreeModelInterface;
 
     /**
-     * @param mixed|array<int, mixed>
+     * @param int|string|array<int, int|string> $id
      * @return TreeModelInterface[]
      */
-    public static function findTreePathsById($id): array;
+    public static function findTreePathModelsById($id): array;
 
     /**
      * @return TreeModelInterface[]
@@ -49,26 +49,4 @@ interface TreeModelInterface
      * @return TreeModelInterface[]
      */
     public function getParentTreeModels(): array;
-
-    /**
-     * @throws TreeValidateException
-     */
-    public function addTreeRoot(): void;
-
-    /**
-     * @throws TreeValidateException
-     */
-    public function appendToTreeModel(TreeModelInterface $model): void;
-
-    /**
-     * @throws TreeValidateException
-     */
-    public function moveAfterTreeModel(TreeModelInterface $model): void;
-
-    /**
-     * @throws TreeValidateException
-     */
-    public function moveBeforeTreeModel(TreeModelInterface $model): void;
-
-    public function deleteTreeModel(): void;
 }

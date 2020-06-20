@@ -6,7 +6,6 @@ use kr0lik\tree\controllers\TreeController;
 use kr0lik\tree\enum\TreeActionEnum;
 use kr0lik\tree\exception\TreeActionException;
 use kr0lik\tree\exception\TreeException;
-use kr0lik\tree\exception\TreeModeException;
 use kr0lik\tree\exception\TreeNotFoundException;
 use kr0lik\tree\repository\TreeRepository;
 use kr0lik\tree\response\TreeResponse;
@@ -67,7 +66,6 @@ class TreeAction extends Action
 
     /**
      * @throws TreeActionException
-     * @throws TreeModeException
      * @throws TreeNotFoundException
      */
     protected function runAction(string $action): TreeResponse
@@ -93,10 +91,7 @@ class TreeAction extends Action
         return new TreeRepository($this->treeModelClass);
     }
 
-    /**
-     * @throws TreeModeException
-     */
-    private function getController(): TreeController
+    protected function getController(): TreeController
     {
         $repository = $this->getRepository();
 

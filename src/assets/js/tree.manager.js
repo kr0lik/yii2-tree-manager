@@ -36,6 +36,8 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         },
         extensions: ['dnd5'],
     }
+    #needToActiveId = null
+
     #getFormOptions = function () {
         return {
             pathAction: this.#options.pathAction,
@@ -53,6 +55,9 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         if (!this.#options.pathAction) {
             throw Error('PathAction option required!');
         }
+    }
+    #initDefaults = function (treeComponent) {
+        this.#needToActiveId = this.#options.activeId;
     }
     #initAppendAction = function (treeComponent) {
         let $button = this.getAppendButtonElelent();
@@ -93,6 +98,13 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
                 this.treeManagerForm.prepareForm(node, treeComponent)
             });
         }
+    }
+    #init = function (treeComponent) {
+        this.#initDefaults(treeComponent);
+        this.#initAddAction(treeComponent);
+        this.#initAppendAction(treeComponent);
+        this.#initRemoveAction(treeComponent);
+        this.#initFormReloadAction(treeComponent);
     }
     #addNode = function (treeComponent, mode = 'child') {
         var node = treeComponent.activeNode;
@@ -179,7 +191,7 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
     getTreeOptions() {
         let options = {
             pathAction: this.#options.pathAction,
-            activeId: this.#options.activeId,
+            needToLoadId: [this.#options.activeId],
             dnd5: this.#options.dnd5,
             extensions: this.#options.extensions,
             plugins: [this],
@@ -259,10 +271,7 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
     run(treeComponent) {
         this.treeManagerForm = new kr0lik.treeManagerForm(this.getFormContainerElelent(), this.#getFormOptions());
 
-        this.#initAddAction(treeComponent);
-        this.#initAppendAction(treeComponent);
-        this.#initRemoveAction(treeComponent);
-        this.#initFormReloadAction(treeComponent);
+        this.#init(treeComponent);
     }
 
     static create = function (containerId, options) {
@@ -307,7 +316,7 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         this.getFormReloadButtonElement().show();
     }
     onRenderNode(node, treeComponent) {
-        if (null === treeComponent.needToActiveId) {
+        if (null === this.#needToActiveId) {
             if (true === this.#options.firstRootActivateDefault) {
                 if (treeComponent.activeNode) {
                     return;
@@ -326,6 +335,12 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
                 }
             } else {
                 this.getFormContainerElelent().html(`<div class="panel-body">${this.#options.messages.notSelected}</div>`);
+            }
+        } else {
+            let checkId = String(node.data.id);
+            if (checkId === this.#needToActiveId) {
+                this.#needToActiveId = null;
+                node.setActive(true);
             }
         }
     }

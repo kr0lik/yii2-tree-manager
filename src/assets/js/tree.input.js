@@ -18,6 +18,8 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
             noData: "No data."
         },
     }
+    #needToSelectId = []
+
     #setOptions = function(options) {
         this.#options = Object.assign(this.#options, options);
     }
@@ -26,52 +28,48 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
             throw Error('PathAction option required!');
         }
     }
-    #isSelectable = function(node) {
-        if (!this.#options.leavesOnly) return true;
-        if (!node.isFolder()) return true;
-        if (false !== this.#options.selectId.indexOf(node.data.id)) return true;
-        return false;
+    #initDefaults = function (treeComponent) {
+        this.#needToSelectId = this.#options.selectId;
+    }
+    #init = function (treeComponent) {
+        this.#initDefaults(treeComponent);
+        this.#updateSelections(treeComponent);
     }
     #updateSelections = function(treeComponent) {
-        let selections = this.#getSelections(treeComponent),
-            selectIds = [];
+        let selections = this.#getSelections(treeComponent);
 
         if (Object.keys(selections).length > 0) {
-            if (this.#options.multiple) {
-                let selectOptions = '';
-                for (let selectId in selections) {
-                    if(true === selections.hasOwnProperty(selectId)) {
-                        let title = selections[selectId] ?? selectId;
-                        selectOptions += `<option value="${selectId}" selected="selected">${title}</option>`;
-                    }
-                }
+            let selectIds = [],
+                selectOptions = [],
+                changed = false;
 
-                let selectIds = Object.keys(selections);
-                if (this.getTreeInputFieldElelent().val() !== selectIds.join(',')) {
-                    this.getTreeInputFieldElelent().html(selectOptions).change();
-                }
-            } else {
-                selectIds = Object.keys(selections);
-                selectIds = selectIds.filter(Boolean);
+            for (let selectId in selections) {
+                if(true === selections.hasOwnProperty(selectId)) {
+                    let currentValues = this.getTreeInputFieldElelent().val();
 
-                if (this.getTreeInputFieldElelent().val() !== selectIds.join(',')) {
-                    this.getTreeInputFieldElelent().val(selectIds.join(',')).change();
+                    changed = (Array.isArray(currentValues) && currentValues.indexOf(selectId) === -1) ||
+                        (!Array.isArray(currentValues) && currentValues !== selectId)
+
+                    selectIds += selectId;
+
+                    let title = selections[selectId] ?? selectId;
+                    selectOptions += `<option value="${selectId}" selected="selected">${title}</option>`;
                 }
             }
 
             let selectTitles = Object.values(selections);
             selectTitles = selectTitles.filter(Boolean);
-
-            if (treeComponent.needToSelectId.length > 0) {
-                selectTitles.push(this.loader);
-            }
+            if (this.#needToSelectId.length > 0) selectTitles.push(this.loader);
 
             this.getTreeInputListElelent().html(selectTitles.join('<br />'));
-        } else {
-            this.#clearInput();
-        }
 
-        $(document).trigger('treeInputChange', [treeComponent.selectedNodes]);
+            if (changed) {
+                this.getTreeInputFieldElelent().html(selectOptions).change();
+                $(document).trigger('treeInputChange', [treeComponent.selectedNodes]);
+            }
+        } else {
+            this.#clearInput(treeComponent);
+        }
     }
     #getSelections = function(treeComponent) {
         let selections = new Object();
@@ -81,7 +79,7 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
             selections[node.data.id] = selectedTitle;
         });
 
-        treeComponent.needToSelectId.forEach(id => {
+        this.#needToSelectId.forEach(id => {
             if (false === selections.hasOwnProperty(id)) {
                 selections[id] = null;
             }
@@ -96,23 +94,27 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
             return;
         }
 
-        if (true === this.#options.multiple) {
-            this.getTreeInputFieldElelent().html('').change();
-        } else {
-            this.getTreeInputFieldElelent().val('').change();
-        }
+        this.getTreeInputFieldElelent().html('').change();
+        $(document).trigger('treeInputChange', [[]]);
+    }
+
+    _isSelectable(node) {
+        if (!this.#options.leavesOnly) return true;
+        if (!node.isFolder()) return true;
+        if (false !== this.#options.selectId.indexOf(node.data.id)) return true;
+        return false;
     }
 
     getTreeOptions() {
         return  {
             pathAction: this.#options.pathAction,
-            selectId: this.#options.selectId,
+            needToLoadId: this.#options.selectId,
             selectMode: this.#options.multiple ? 2 : 1,
             checkbox: ($event, $data) => {
                 let $node = $data.node,
                     $type = this.#options.multiple ? 'checkbox' : 'radio';
 
-                if (false === this.#isSelectable($node)) {
+                if (false === this._isSelectable($node)) {
                     return false;
                 }
 
@@ -129,7 +131,7 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
         this.#setOptions(options);
     }
     run(treeComponent) {
-        this.#updateSelections(treeComponent);
+        this.#init(treeComponent);
     }
 
     static create = function (containerId, options) {
@@ -152,13 +154,23 @@ kr0lik.treeInput = class TreeInput extends kr0lik.treePlugin {
     }
 
     onSelect(node, treeComponent) {
-        if (true === this.#isSelectable(node)) {
+        if (true === this._isSelectable(node)) {
             this.#updateSelections(treeComponent);
         }
     }
     onActivate(node, treeComponent) {
-        if (false === this.#options.multiple && true === this.#isSelectable(node)) {
+        if (false === this.#options.multiple && true === this._isSelectable(node)) {
             node.setSelected(true);
+        }
+    }
+    onRenderNode(node, treeComponent) {
+        if (this._isSelectable(node)) {
+            let checkId = String(node.data.id);
+            let index = this.#needToSelectId.indexOf(checkId);
+            if (index > -1) {
+                this.#needToSelectId.splice(index, 1);
+                node.setSelected(true);
+            }
         }
     }
 }

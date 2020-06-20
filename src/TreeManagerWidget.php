@@ -13,7 +13,7 @@ class TreeManagerWidget extends Widget
     /**
      * @var array<string, mixed>
      */
-    private $treeConfig = [];
+    protected $treeConfig = [];
     /**
      * @var array<string, mixed>
      */
@@ -65,6 +65,7 @@ class TreeManagerWidget extends Widget
 
     public function run(): string
     {
+        $this->registerBsAsset();
         $this->registerAssets();
 
         return $this->render($this->viewPath, [
@@ -131,10 +132,8 @@ class TreeManagerWidget extends Widget
         $this->treeOptions['class'] = ArrayHelper::getValue($this->treeOptions, 'class', 'tree-manager-widget');
     }
 
-    private function registerAssets(): void
+    protected function registerAssets(): void
     {
-        $this->registerBsAsset();
-
         TreeManagerAsset::register($this->getView());
 
         $this->getView()

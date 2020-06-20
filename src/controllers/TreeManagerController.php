@@ -2,20 +2,43 @@
 namespace kr0lik\tree\controllers;
 
 use kr0lik\tree\contracts\TreeModelInterface;
-use kr0lik\tree\enum\TreeActionEnum;
-use kr0lik\tree\enum\TreeModeEnum;
-use kr0lik\tree\exception\{TreeModeException, TreeNotFoundException, TreeValidateException};
+use kr0lik\tree\enum\TreeManagerActionEnum;
+use kr0lik\tree\enum\TreeManagerModeEnum;
+use kr0lik\tree\exception\{TreeManagerModeException, TreeNotFoundException, TreeValidateException};
+use kr0lik\tree\repository\TreeRepository;
 use kr0lik\tree\response\TreeResponse;
 use Yii;
-use yii\base\ErrorException;
 use yii\base\Model;
-use yii\base\Widget;
 use yii\db\ActiveRecord;
-use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\web\Controller;
 
-class TreeManagerController extends AbstractTreeController
+class TreeManagerController extends TreeController
 {
+    /**
+     * @throws TreeManagerModeException
+     */
+    public function __construct(Controller $controller, TreeRepository $repository)
+    {
+        parent::__construct($controller, $repository);
+
+        $this->validateMode();
+    }
+
+    /**
+     * @throws TreeManagerModeException
+     */
+    private function validateMode(): void
+    {
+        $mode = Yii::$app->request->get('mode');
+
+        $enumModeClass = new \ReflectionClass(TreeManagerModeEnum::class);
+
+        if  ($mode && !in_array($mode, $enumModeClass->getConstants())) {
+            throw new TreeManagerModeException($mode);
+        }
+    }
+
     /**
      * @param string[]|callable $formFields
      * @param string[]|callable $formLinks
@@ -30,7 +53,7 @@ class TreeManagerController extends AbstractTreeController
         if ($targetId) {
             $targetModel = $this->repository->getById($targetId);
         } else {
-            $class = $this->repository->getTreeModelClass();
+            $class = $this->repository->getModelClass();
             /** @var TreeModelInterface $targetModel */
             $targetModel = new $class;
         }
@@ -61,9 +84,9 @@ class TreeManagerController extends AbstractTreeController
         ];
 
         if ($targetId) {
-            $query['action'] = TreeActionEnum::UPDATE;
+            $query['action'] = TreeManagerActionEnum::UPDATE;
         } else {
-            $query['action'] = TreeActionEnum::CREATE;
+            $query['action'] = TreeManagerActionEnum::CREATE;
         }
 
         return Url::to($query);
@@ -73,7 +96,7 @@ class TreeManagerController extends AbstractTreeController
     {
         $postData = Yii::$app->request->post();
 
-        $class = $this->repository->getTreeModelClass();
+        $class = $this->repository->getModelClass();
         /** @var ActiveRecord|TreeModelInterface $targetModel */
         $targetModel = new $class;
         $targetModel->load($postData);
@@ -99,7 +122,7 @@ class TreeManagerController extends AbstractTreeController
             throw new TreeModeException($mode);
         }
 
-        $class = $this->repository->getTreeModelClass();
+        $class = $this->repository->getModelClass();
         /** @var TreeModelInterface|Model $targetModel */
         $targetModel = new $class;
         $targetModel->load(Yii::$app->request->post());
@@ -143,7 +166,6 @@ class TreeManagerController extends AbstractTreeController
     {
         $targetId = Yii::$app->request->get('targetId');
 
-        /** @var TreeModelInterface $targetModel */
         $targetModel = $this->repository->getById($targetId);
 
         $targetModel->deleteTreeModel();
@@ -153,6 +175,7 @@ class TreeManagerController extends AbstractTreeController
 
     /**
      * @throws TreeNotFoundException
+     * @throws TreeManagerModeException
      */
     public function moveAction(): TreeResponse
     {
@@ -164,18 +187,18 @@ class TreeManagerController extends AbstractTreeController
         $hitModel = $this->repository->getById($hitId);
 
         switch ($mode) {
-            case TreeModeEnum::OVER:
-            case TreeModeEnum::CHILD:
+            case TreeManagerModeEnum::OVER:
+            case TreeManagerModeEnum::CHILD:
                 $targetModel->appendToTreeModel($hitModel);
                 break;
-            case TreeModeEnum::AFTER:
+            case TreeManagerModeEnum::AFTER:
                 $targetModel->moveAfterTreeModel($hitModel);
                 break;
-            case TreeModeEnum::BEFORE:
+            case TreeManagerModeEnum::BEFORE:
                 $targetModel->moveBeforeTreeModel($hitModel);
                 break;
             default:
-                throw new TreeModeException();
+                throw new TreeManagerModeException();
         }
 
         return TreeResponse::data($this->prepareModelData($targetModel));

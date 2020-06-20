@@ -7,8 +7,7 @@ var kr0lik = {
 
         #options = {
             pathAction: null,
-            activeId: null,
-            selectId: [],
+            needToLoadId: [],
             plugins: [],
 
             dnd5: null,
@@ -35,8 +34,6 @@ var kr0lik = {
             }
         }
         #nodeToLoadId = [];
-        #nodeToSelectId = [];
-        #needToActiveId = null;
 
         #setOptions = function (options) {
             this.#options = Object.assign(this.#options, options);
@@ -54,7 +51,7 @@ var kr0lik = {
         }
         #init = function () {
             this.#initTree();
-            this.#initSelections();
+            this.#initLoadNodes();
             this.#initSearch();
         }
         #initTree = function () {
@@ -141,20 +138,13 @@ var kr0lik = {
                 },
             };
         }
-        #initSelections = function () {
-            this.#nodeToSelectId = $.map(this.#options.selectId, function (id){
-                return String(id);
-            });
-            this.#needToActiveId = this.#options.activeId;
-
+        #initLoadNodes = function () {
             // Colect unique ids
-            let needIds = [...this.#nodeToSelectId];
-            needIds.push(this.#needToActiveId);
-            needIds = [...new Set(needIds)];
-            needIds = needIds.filter(Boolean);
+            this.#nodeToLoadId = [...new Set(this.#options.needToLoadId)];
+            this.#nodeToLoadId = this.#nodeToLoadId.filter(Boolean);
 
-            if (needIds.length > 0) {
-                this.loadPaths(needIds);
+            if (this.#nodeToLoadId.length > 0) {
+                this.loadPaths(this.#nodeToLoadId);
             }
         }
         #initSearch = function () {
@@ -197,7 +187,12 @@ var kr0lik = {
             this.#options.plugins.forEach(plugin => plugin.onRenderNode(node, this));
         }
         #getTitle = function (node) {
-            let spanTitle = `<span class="fancytree-title">${node.title}</span>`,
+            let classes = ['fancytree-title'];
+            if (true === node.disabled) {
+                classes.push('text-muted');
+            }
+
+            let spanTitle = `<span class="${classes.join(' ')}">${node.title}</span>`,
                 spanCounter = '';
 
             if (node.data.countAll != null || node.data.countActive != null) {
@@ -208,36 +203,37 @@ var kr0lik = {
                     str += node.data.countActive;
                 }
 
-                spanCounter = `<small class="fancytree-count">(${str})</small>`;
+                spanCounter = `<small class="fancytree-childcounter">(${str})</small>`;
             }
 
             return spanTitle + spanCounter
         }
         #getIcon = function (node) {
+            let classes = [];
+
+            if (true === node.disabled) {
+                classes.push('text-muted');
+            }
+
             if (node.getLevel() === 1) {
-                return 'fa fa-tree';
+                classes.push('fa', 'fa-tree');
+                return classes.join(' ');
             }
 
             if(node.isFolder()) {
-                return 'fa fa-folder';
+                classes.push('fa', 'fa-folder');
+                return classes.join(' ');
             }
 
             return false;
         }
         #select = function (node) {
-            let selectedNodes = this.tree.getSelectedNodes();
-            this.#options.selectId = $.map(selectedNodes, function (selectedNode) {
-                return selectedNode.data.id;
-            });
-
             this.#options.plugins.forEach(plugin => plugin.onSelect(node, this));
         }
         #activate = function (node) {
             if (!node.isLoaded() && !node.isLoading()) {
                 node.load(false);
             }
-
-            this.#needToActiveId = node.data.id;
 
             this.#options.plugins.forEach(plugin => plugin.onActivate(node, this));
         }
@@ -307,19 +303,6 @@ var kr0lik = {
             });
         }
         loadNode(node) {
-            if (node.data.id === this.#needToActiveId) {
-                this.#needToActiveId = null;
-                node.setActive(true);
-            }
-
-            let checkId = String(node.data.id);
-            let searchSelection = this.#nodeToSelectId.indexOf(checkId);
-            if (searchSelection > -1) {
-                // First remove from nodeToSelectId and then call setSelected
-                this.#nodeToSelectId.splice(searchSelection, 1);
-                node.setSelected(true);
-            }
-
             if (false === node.isLoaded() && false === node.isLoading()) {
                 node.load(true);
             } else {
@@ -397,12 +380,6 @@ var kr0lik = {
         get selectedNodes() {
             return this.tree.getSelectedNodes();
         }
-        get needToSelectId() {
-            return this.#nodeToSelectId;
-        }
-        get needToActiveId() {
-            return this.#needToActiveId;
-        }
     },
 
     treePlugin: class TreePlugin {
@@ -413,8 +390,8 @@ var kr0lik = {
         onExpand(node, treeComponent) {}
         onCollapse(node, treeComponent) {}
 
-        getOptions() {
-            return [];
+        getTreeOptions() {
+            return {};
         }
     }
 }

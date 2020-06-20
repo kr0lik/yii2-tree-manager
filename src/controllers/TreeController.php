@@ -3,11 +3,28 @@ namespace kr0lik\tree\controllers;
 
 use kr0lik\tree\contracts\TreeModelInterface;
 use kr0lik\tree\exception\TreeNotFoundException;
+use kr0lik\tree\repository\TreeRepository;
 use kr0lik\tree\response\TreeResponse;
 use Yii;
+use yii\web\Controller;
 
-class TreeController extends AbstractTreeController
+class TreeController
 {
+    /**
+     * @var Controller
+     */
+    protected $controller;
+    /**
+     * @var TreeRepository
+     */
+    protected $repository;
+
+    public function __construct(Controller $controller, TreeRepository $repository)
+    {
+        $this->controller = $controller;
+        $this->repository = $repository;
+    }
+
     public function getRootsAction(): TreeResponse
     {
         $models = $this->repository->findRoots();
@@ -55,8 +72,7 @@ class TreeController extends AbstractTreeController
         $targetId = Yii::$app->request->get('targetId');
 
         /** @var TreeModelInterface $class */
-        $class = $this->repository->getTreeModelClass();
-        $models = $class::findTreePathsById($targetId);
+        $models = $this->repository->findPaths($targetId);
 
         return TreeResponse::data(array_map(function (TreeModelInterface $model) {
             return $this->prepareModelData($model);
@@ -73,5 +89,25 @@ class TreeController extends AbstractTreeController
         $model = $this->repository->getById($targetId);
 
         return TreeResponse::data($this->prepareModelData($model));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function prepareModelData(TreeModelInterface $model): array
+    {
+        return [
+            'title' => $model->getTreeTitle(),
+            'folder' => $model->isTreeFolder(),
+            'expanded' => false,
+            'lazy' => true,
+            'children' => $model->hasChildrenTreeModels() ? null : [],
+            'data' => [
+                'id' => $model->getTreeId(),
+                'countAll' => $model->getTreeCountAll(),
+                'countActive' => $model->getTreeCountActive(),
+                'hasChildren' => $model->hasChildrenTreeModels(),
+            ],
+        ];
     }
 }

@@ -14,7 +14,7 @@ class TreeInput extends InputWidget
     /**
      * @var array<string, mixed>
      */
-    private $treeConfig = [];
+    protected $treeConfig = [];
     /**
      * @var array<string, mixed>
      */
@@ -58,36 +58,22 @@ class TreeInput extends InputWidget
 
     public function run(): string
     {
+        $this->registerBsAsset();
         $this->registerAssets();
-
-        if ($this->multiple) {
-            $inputField = $this->getSelectField();
-        } else {
-            $inputField = $this->getInpurField();
-        }
 
         return $this->render($this->viewPath, [
             'options' => $this->treeOptions,
-            'inputField' => $inputField,
+            'inputField' => $this->getSelectField(),
             'collapse' => $this->collapse,
             'bsCssClasses' => $this->bsCssClasses, // From BsVersionTrait
         ]);
-    }
-
-    private function getInpurField(): string
-    {
-        if ($this->hasModel()) {
-            return Html::activeHiddenInput($this->model, $this->attribute, $this->options);
-        }
-
-        return Html::hiddenInput($this->name, $this->value, $this->options);
     }
 
     private function getSelectField(): string
     {
         $style = ArrayHelper::getValue($this->options, 'style', '');
         $this->options['style'] = 'display: none;'.($style ? " $style" : '');
-        $this->options['multiple'] = 'multiple';
+        if ($this->multiple) $this->options['multiple'] = 'multiple';
 
         $items = array_combine($this->getSelectId(), $this->getSelectId());
 
@@ -143,10 +129,8 @@ class TreeInput extends InputWidget
         $this->options['class'] = trim(ArrayHelper::getValue($this->options, 'class', '').' tree-input-field');
     }
 
-    private function registerAssets(): void
+    protected function registerAssets(): void
     {
-        $this->registerBsAsset();
-
         TreeInputAsset::register($this->getView());
 
         $this->getView()

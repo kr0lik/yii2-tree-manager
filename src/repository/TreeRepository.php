@@ -5,28 +5,28 @@ use kr0lik\tree\contracts\TreeModelInterface;
 use kr0lik\tree\exception\TreeClassException;
 use kr0lik\tree\exception\TreeNotFoundException;
 
-/**
- * Class TreeRepository.
- */
 class TreeRepository
 {
     /**
      * @var string|TreeModelInterface
      */
-    private $treeModelClass;
+    private $modelClass;
 
+    /**
+     * @throws TreeClassException
+     */
     public function __construct(string $treeModelClass)
     {
         if (!class_exists($treeModelClass)) {
-            throw new TreeClassException();
+            throw new TreeClassNotExistsException();
         }
 
-        $this->treeModelClass = $treeModelClass;
+        $this->modelClass = $treeModelClass;
     }
 
-    public function getTreeModelClass(): string
+    public function getModelClass(): string
     {
-        return $this->treeModelClass;
+        return $this->modelClass;
     }
 
     /**
@@ -35,8 +35,7 @@ class TreeRepository
      */
     public function getById($id): TreeModelInterface
     {
-        /** @var TreeModelInterface|null $model */
-        $model = ($this->treeModelClass)::findTreeModelById($id);
+        $model = ($this->modelClass)::findTreeModelById($id);
 
         if (!$model) {
             throw new TreeNotFoundException();
@@ -50,6 +49,15 @@ class TreeRepository
      */
     public function findRoots(): array
     {
-        return ($this->treeModelClass)::findTreeRoots();
+        return ($this->modelClass)::findTreeRoots();
+    }
+
+    /**
+     * @param int|string|array<int, int|string> $id
+     * @return TreeModelInterface[]
+     */
+    public function findPaths($id): array
+    {
+        return ($this->modelClass)::findTreePathModelsById($id);
     }
 }
