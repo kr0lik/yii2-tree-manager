@@ -135,7 +135,7 @@ class TreeInput extends InputWidget
 
         $this->getView()
             ->registerJs(
-                sprintf('new kr0lik.treeInput.create("%s", %s);', $this->treeOptions['id'], Json::encode($this->treeConfig))
+                sprintf('new kr0lik.treeInput.run("%s", %s);', $this->treeOptions['id'], Json::encode($this->treeConfig))
             );
     }
 

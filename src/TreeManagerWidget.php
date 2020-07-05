@@ -25,7 +25,7 @@ class TreeManagerWidget extends Widget
     /**
      * @var bool
      */
-    public $multipleRoots = false;
+    public $multipleRoots = true;
     /**
      * @var mixed
      */
@@ -138,7 +138,7 @@ class TreeManagerWidget extends Widget
 
         $this->getView()
             ->registerJs(
-                sprintf('new kr0lik.treeManager.create("%s", %s);', $this->treeOptions['id'], Json::encode($this->treeConfig))
+                sprintf('new kr0lik.treeManager.run("%s", %s);', $this->treeOptions['id'], Json::encode($this->treeConfig))
             );
     }
 }

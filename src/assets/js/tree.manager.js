@@ -99,13 +99,6 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
             });
         }
     }
-    #init = function (treeComponent) {
-        this.#initDefaults(treeComponent);
-        this.#initAddAction(treeComponent);
-        this.#initAppendAction(treeComponent);
-        this.#initRemoveAction(treeComponent);
-        this.#initFormReloadAction(treeComponent);
-    }
     #addNode = function (treeComponent, mode = 'child') {
         var node = treeComponent.activeNode;
 
@@ -187,6 +180,50 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
 
         $(document).trigger('treeElementAfterRemove', [node]);
     }
+    getParentNodes = function (node) {
+        let parentNodes = [],
+            parent = node.parent;
+
+        while (parent != null) {
+            if (parent.parent != null) {
+                parentNodes.push(parent);
+            }
+
+            parent = parent.parent;
+        }
+
+        return parentNodes;
+    }
+    updateNode(node, recursive = false) {
+        if (node.isRoot()) {
+            return;
+        }
+
+        $.get(
+            this.#options.pathAction,
+            {action: 'getData', targetId: node.data.id},
+            "json"
+        ).done(result => {
+            if (result.success) {
+                let data = result.data;
+
+                node.folder = data.folder;
+                node.title = data.title;
+                node.data.countAll = data.data.countAll;
+                node.data.countActive = data.data.countActive;
+
+                node.renderTitle();
+
+                if (recursive && node.parent) {
+                    this.updateNode(node.parent, true);
+                }
+            } else {
+                this.showError(result.message);
+            }
+        }).fail((response) => {
+            this.showError(response.statusText);
+        });
+    }
 
     getTreeOptions() {
         let options = {
@@ -246,7 +283,7 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
                             this.updateNode(nodeToUpdate, false);
                         });
 
-                        this._updateBreadCrumbsPlaces(targetNode);
+                        this.treeManagerForm.updateNodeBreadCrumbsElement(targetNode);
 
                         $(document).trigger('treeElementAfterMove', [targetNode, hitNode]);
                     } else if (result.message) {
@@ -268,17 +305,21 @@ kr0lik.treeManager = class TreeManager extends kr0lik.treePlugin {
         this.#setOptions(options);
         this.#validate();
     }
-    run(treeComponent) {
+    init(treeComponent) {
         this.treeManagerForm = new kr0lik.treeManagerForm(this.getFormContainerElelent(), this.#getFormOptions());
 
-        this.#init(treeComponent);
+        this.#initDefaults(treeComponent);
+        this.#initAddAction(treeComponent);
+        this.#initAppendAction(treeComponent);
+        this.#initRemoveAction(treeComponent);
+        this.#initFormReloadAction(treeComponent);
     }
 
-    static create = function (containerId, options) {
+    static run = function (containerId, options) {
         var instance = new TreeManager(containerId, options);
         var tree = new kr0lik.treeComponent(instance.getTreeContainerElelent(), instance.getTreeOptions());
 
-        instance.run(tree);
+        instance.init(tree);
 
         return instance;
     }
@@ -370,10 +411,6 @@ kr0lik.treeManagerForm = class TreeManagerForm {
             throw Error('PathAction option required!');
         }
     }
-    #updateNodeBreadCrumbsElement = function (node, treeComponent) {
-        let crumbs = treeComponent.getBreadCrumbs(node);
-        this.#options.context.getBreadCrumbsElement().html(crumbs);
-    }
     #updateNodeNameElement = function (name) {
         this.#options.context.getNodeNameElement().html(name.bold());
     }
@@ -418,7 +455,7 @@ kr0lik.treeManagerForm = class TreeManagerForm {
 
         editedNode.setTitle(nodeName);
 
-        this.#updateNodeBreadCrumbsElement(editedNode, treeComponent);
+        this.updateNodeBreadCrumbsElement(editedNode, treeComponent);
         this.#updateNodeNameElement(editedNode.title);
 
         this.getFormErrorMessageElement().hide();
@@ -592,12 +629,23 @@ kr0lik.treeManagerForm = class TreeManagerForm {
     }
 
     prepareForm(editedNode, treeComponent) {
-        this.#updateNodeBreadCrumbsElement(editedNode, treeComponent);
+        this.updateNodeBreadCrumbsElement(editedNode);
         this.#updateNodeNameElement(editedNode.title);
 
         this.$containerElement.html(this.loader);
 
         this.#loadForm(editedNode, treeComponent);
+    }
+    getBreadCrumbs(node, separator = '/') {
+        let crumbs = this.#options.context.getParentNodes(node).map(function (parentNode) {
+            return parentNode.title;
+        });
+
+        return crumbs.reverse().join(separator) + (crumbs.length ? separator : '');
+    }
+    updateNodeBreadCrumbsElement(node) {
+        let crumbs = this.getBreadCrumbs(node);
+        this.#options.context.getBreadCrumbsElement().html(crumbs);
     }
 
     showError(message) {

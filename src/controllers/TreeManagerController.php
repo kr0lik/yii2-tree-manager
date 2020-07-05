@@ -118,7 +118,7 @@ class TreeManagerController extends TreeController
         $hitId = Yii::$app->request->get('hitId');
         $mode = Yii::$app->request->get('mode');
 
-        if (!in_array($mode, [TreeModeEnum::AFTER, TreeModeEnum::CHILD])) {
+        if (!in_array($mode, [TreeManagerModeEnum::AFTER, TreeManagerModeEnum::CHILD])) {
             throw new TreeModeException($mode);
         }
 
@@ -129,7 +129,7 @@ class TreeManagerController extends TreeController
 
         if ($hitId) {
             $hitModel = $this->repository->getById($hitId);
-            if ($mode === TreeModeEnum::CHILD) {
+            if ($mode === TreeManagerModeEnum::CHILD) {
                 $targetModel->appendToTreeModel($hitModel);
             } else {
                 $targetModel->moveAfterTreeModel($hitModel);

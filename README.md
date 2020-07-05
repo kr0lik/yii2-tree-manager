@@ -107,19 +107,19 @@ use kr0lik\tree\TreeManagerWidget;
 
 Events:
 ```js
-$(document).on('treeFormAfterLoade', function ($event, $form, $node) {
+$(document).on('treeFormAfterLoade', function (event, form, node) {
 
 });
-$(document).on('treeFormAfterSubmit', function ($event, $form, $node) {
+$(document).on('treeFormAfterSubmit', function (event, form, node) {
 
 });
-$(document).on('treeElementAfterMove', function ($event, $targetNode, $hitNode) {
+$(document).on('treeElementAfterMove', function (event, targetNode, hitNode) {
 
 });
-$(document).on('treeElementAfterRemove', function ($event, $node) {
+$(document).on('treeElementAfterRemove', function (event, node) {
 
 });
-$(document).on('treeFormAfterReset', function ($event, $node) {
+$(document).on('treeFormAfterReset', function (event, node) {
 
 });
 ```
@@ -179,7 +179,7 @@ use kr0lik\tree\TreeInput;
 
 Events:
 ```js
-$(document).on('treeInputChange', function ($event, $selectedNodes) {
+$(document).on('treeInputChange', function (event, selections) {
 
 });
 ```
@@ -242,7 +242,7 @@ use kr0lik\tree\TreeInput;
 
 Events:
 ```js
-$(document).on('treeInputChange', function ($event, $selectedNodes) {
+$(document).on('treeInputChange', function (event, selections) {
 
 });
 ```
